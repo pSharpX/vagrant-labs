@@ -122,7 +122,7 @@ wildfly_installation(){
   sudo groupadd -r wildfly
 
   # To add an existing user to a secondary group, use the usermod -a -G command followed the name of the group and the user:
-  sudo usermod -a -G wildfly wildfly
+  sudo usermod -a -G vagrant wildfly
   
   echo "########## Downloading Wildfly $WILDFLY_VERSION"
   wget -nv https://download.jboss.org/wildfly/$WILDFLY_VERSION.Final/wildfly-$WILDFLY_VERSION.Final.tar.gz -P /tmp
