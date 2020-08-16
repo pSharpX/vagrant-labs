@@ -122,7 +122,7 @@ wildfly_installation(){
   sudo groupadd -r wildfly
 
   # To add an existing user to a secondary group, use the usermod -a -G command followed the name of the group and the user:
-  sudo usermod -a -G wildfly vagrant
+  sudo usermod -a -G wildfly wildfly
   
   echo "########## Downloading Wildfly $WILDFLY_VERSION"
   wget -nv https://download.jboss.org/wildfly/$WILDFLY_VERSION.Final/wildfly-$WILDFLY_VERSION.Final.tar.gz -P /tmp
@@ -146,16 +146,25 @@ wildfly_installation(){
   sudo cp /opt/wildfly/docs/contrib/scripts/systemd/wildfly.service /etc/systemd/system/
   sudo cp /opt/wildfly/docs/contrib/scripts/systemd/launch.sh /opt/wildfly/bin/
 
+  sudo echo JAVA_HOME=$JAVA_HOME >> /etc/wildfly/wildfly.conf
+  sudo echo WILDFLY_HOME=/opt/wildfly >> /etc/wildfly/wildfly.conf
+  sudo echo JBOSS_USER=wildfly >> /etc/wildfly/wildfly.conf
+  sudo echo WILDFLY_USER=wildfly >> /etc/wildfly/wildfly.conf
+
+  # Change Wildfly user define in wildfly.service
+  sudo sed -n 's/User=wildfly/User=vagrant/g' /etc/systemd/system/wildfly.service
+
   # The scripts inside bin directory must have executable flag
   sudo sh -c 'chmod +x /opt/wildfly/bin/*.sh'
 
   # Change the directory ownership to user and group wildfly with the following chown command :
-  sudo chown -RH wildfly: /opt/wildfly
+  sudo chown -RH vagrant: /opt/wildfly
 
   # Reload systemd service
   sudo systemctl daemon-reload
 
   # Start and enable WildFly service:
+  echo "########## Starting and enabling WildFly service:"
   sudo systemctl start wildfly
   sudo systemctl enable wildfly
 
