@@ -17,9 +17,9 @@ java_installation(){
   JAVA_HOME_VAR=$(dirname $(dirname $(readlink $(readlink $(which javac)))))
 
   echo "########## Setting Java environment variables"
-  sudo sh -c "echo export JAVA_HOME=$JAVA_HOME_VAR >> /etc/profile"
-  sudo sh -c "echo export PATH=$PATH:$JAVA_HOME_VAR/bin >> /etc/profile"
-  sudo sh -c "echo export CLASSPATH=.:$JAVA_HOME_VAR/jre/lib:$JAVA_HOME_VAR/lib:$JAVA_HOME_VAR/lib/tools.jar >> /etc/profile"
+  echo export JAVA_HOME=$JAVA_HOME_VAR >> /etc/profile
+  echo export PATH=\$PATH:$JAVA_HOME_VAR/bin >> /etc/profile
+  echo export CLASSPATH=.:$JAVA_HOME_VAR/jre/lib:$JAVA_HOME_VAR/lib:$JAVA_HOME_VAR/lib/tools.jar >> /etc/profile
 
   # source the file or logout and back in.
   source /etc/profile
@@ -33,13 +33,11 @@ java_installation(){
 
 maven_installation(){
   echo "########## Installing Maven $M2_VERSION"
-  
   echo "########## Downloading Apache Maven $M2_VERSION"
   wget -nv https://www-us.apache.org/dist/maven/maven-3/$M2_VERSION/binaries/apache-maven-$M2_VERSION-bin.tar.gz -P /tmp
 
   # When the download is completed, extract the archive in the /opt directory:
   sudo tar xf /tmp/apache-maven-$M2_VERSION-bin.tar.gz -C /opt
-
   echo "Removing /tmp/apache-maven-$M2_VERSION-bin.tar.gz"
   sudo rm /tmp/apache-maven-$M2_VERSION-bin.tar.gz
 
@@ -49,38 +47,32 @@ maven_installation(){
   # Setup environment variables
   sudo touch /etc/profile.d/maven.sh
   echo "########## Setting Maven environment variables"
-
   echo export M2_HOME=/opt/maven >> /etc/profile.d/maven.sh
   echo export MAVEN_HOME=/opt/maven >> /etc/profile.d/maven.sh
-  echo export PATH=$PATH:/opt/maven/bin >> /etc/profile.d/maven.sh
+  echo export PATH=\$PATH:/opt/maven/bin >> /etc/profile.d/maven.sh
 
   # Make the script executable by running the following chmod command:
   sudo chmod +x /etc/profile.d/maven.sh
   # sudo chown vagrant: /etc/profile.d/maven.sh
-
   # source the file or logout and back in.
   source /etc/profile.d/maven.sh
 
   echo "########## Maven Version"
   mvn -version
 
-  echo $M2_HOME
   echo $MAVEN_HOME
   echo $PATH
-
   echo "Apache Maven $M2_VERSION is now installed on your CentOS system"
 }
 
 gradle_installation(){
   echo "########## Installing Gradle $GRADLE_VERSION"
-
   echo "########## Downloading Gradle $GRADLE_VERSION"
   wget -nv https://services.gradle.org/distributions/gradle-$GRADLE_VERSION-bin.zip -P /tmp
 
   #  extract the zip file in the /opt/gradle directory:
   echo "########## Extracting zip file to /opt/gradle"
   sudo unzip -q -d /opt/gradle /tmp/gradle-$GRADLE_VERSION-bin.zip
-
   echo "Removing /tmp/gradle-$GRADLE_VERSION-bin.zip"
   sudo rm /tmp/gradle-$GRADLE_VERSION-bin.zip
 
@@ -88,28 +80,22 @@ gradle_installation(){
   ls /opt/gradle/gradle-$GRADLE_VERSION
 
   # Setup environment variables
-  # sudo touch /etc/profile.d/gradle.sh # [1] Not working. Export PATH in this file not being recognized
+  sudo touch /etc/profile.d/gradle.sh
   echo "########## Setting Gradle environment variables"
-
-  # echo export GRADLE_HOME=/opt/gradle/gradle-$GRADLE_VERSION >> /etc/profile.d/gradle.sh
-  # echo export PATH=$PATH:/opt/gradle/gradle-$GRADLE_VERSION/bin >> /etc/profile.d/gradle.sh
-  echo export GRADLE_HOME=/opt/gradle/gradle-$GRADLE_VERSION >> /etc/profile
-  echo export PATH=$PATH:/opt/gradle/gradle-$GRADLE_VERSION/bin >> /etc/profile
+  echo export GRADLE_HOME=/opt/gradle/gradle-$GRADLE_VERSION >> /etc/profile.d/gradle.sh
+  echo export PATH=\$PATH:/opt/gradle/gradle-$GRADLE_VERSION/bin >> /etc/profile.d/gradle.sh
 
   # Make the script executable by running the following chmod command:
-  # sudo chmod +x /etc/profile.d/gradle.sh # [1] Not working. Export PATH in this file not being recognized
-  # sudo chown vagrant: /etc/profile.d/gradle.sh # [1] Not working. Export PATH in this file not being recognized
-
+  sudo chmod +x /etc/profile.d/gradle.sh
+  # sudo chown vagrant: /etc/profile.d/gradle.sh
   # source the file or logout and back in.
-  # source /etc/profile.d/gradle.sh # [1] Not working. Export PATH in this file not being recognized
-  source /etc/profile
+  source /etc/profile.d/gradle.sh 
 
   echo "########## Gradle Version"
   gradle  -v
 
   echo $GRADLE_HOME
   echo $PATH
-
   echo "Gradle $GRADLE_VERSION is now installed on your CentOS system"
 }
 
@@ -143,5 +129,5 @@ gradle_installation
 date > "$PROVISIONED_ON"
 
 echo "Successfully created Java dev virtual machine."
-echo "Shuting down !"
-sudo shutdown -h now
+# echo "Shuting down !"
+# sudo shutdown -h now
