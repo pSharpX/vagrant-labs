@@ -1,7 +1,7 @@
 #!/bin/sh
 
 USERNAME=${1:-"admin"}
-PASSWORD=${2:-"\$admin123.a"}
+PASSWORD=${2:-'\$admin123.a'}
 
 ADD_USER="add-user.sh"
 
