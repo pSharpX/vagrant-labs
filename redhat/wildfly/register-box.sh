@@ -1,7 +1,7 @@
 #!/bin/bash
 
-BOX_NAME=${1:-"psharpx/openjdk8-primary"}
-BOX_FILE=${2:-"openjdk8-primary.box"}
+BOX_NAME=${1:-"psharpx/wildfly-primary"}
+BOX_FILE=${2:-"wildfly-primary.box"}
 
 # Check whether file exist or not
 if [ ! -f "$BOX_FILE" ]; then

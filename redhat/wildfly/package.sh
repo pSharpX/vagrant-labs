@@ -20,9 +20,8 @@ fi
 # Machine is shutdown so we need up machine again
 echo "=========> 2). VM: Up & Running ...."
 vagrant up
-vagrant halt
 echo "=========> 2). VM: Packaging VBox Custom Box ...."
-if [[ "$(vagrant package --vagrantfile Vagrantfile --output openjdk8-primary.box java_dev_environment 2> /dev/null)" == "" ]]; then
+if [[ "$(vagrant package --vagrantfile Vagrantfile --output wildfly-primary.box wildfly_dev_environment 2> /dev/null)" == "" ]]; then
     echo "******** An error occured while running 'vagrant package' command."
     echo "******** 1) Invalid options were specified."
     exit

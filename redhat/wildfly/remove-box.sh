@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BOX_NAME=${1:-"psharpx/openjdk8-primary"}
+BOX_NAME=${1:-"psharpx/wildfly-primary"}
 
 echo "=========> 1). VM: Removing custom Box from vagrant ...."
 if [[ "$(vagrant box remove $BOX_NAME 2> /dev/null)" == "" ]]; then
