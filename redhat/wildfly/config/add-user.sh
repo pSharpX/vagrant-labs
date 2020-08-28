@@ -8,7 +8,7 @@ ADD_USER="add-user.sh"
 echo "******* Adding default wildfly user: $USERNAME"
 sh -c "$ADD_USER -u $USERNAME -p $PASSWORD"
 echo "******* Wildfly user added successfully"
-read -n 1 -s -r -p "Press any key to continue"
+# read -n 1 -s -r -p "Press any key to continue"
 
 # Adding a WildFly User in non-interactive ways
 
