@@ -17,7 +17,7 @@ if [[ "$(vagrant up 2> /dev/null)" == "" ]]; then
     exit
 fi
 
-# Machine is shutdown so we need up machine again
+# Make sure machine is running
 echo "=========> 2). VM: Up & Running ...."
 vagrant up
 
@@ -28,7 +28,7 @@ vagrant ssh -c "test -f $PROVISIONED_ON && sudo rm $PROVISIONED_ON"
 
 vagrant halt
 echo "=========> 4). VM: Packaging VBox Custom Box ...."
-if [[ "$(vagrant package --vagrantfile Vagrantfile --output openjdk8-primary.box java_dev_environment 2> /dev/null)" == "" ]]; then
+if [[ "$(vagrant package --vagrantfile Vagrantfile --output ansible-awx-primary.box ansible_awx_dev_environment 2> /dev/null)" == "" ]]; then
     echo "******** An error occured while running 'vagrant package' command."
     echo "******** 1) Invalid options were specified."
     exit
