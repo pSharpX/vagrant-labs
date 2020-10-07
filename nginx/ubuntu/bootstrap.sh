@@ -73,7 +73,7 @@ nginx_installation(){
             --user=vagrant \
             --group=vagrant \
             --build=Ubuntu \
-            --builddir=$NGINX_PATH \
+            --builddir=$NGINX_FOLDER \
             --with-select_module \
             --with-poll_module \
             --with-threads \
@@ -121,8 +121,14 @@ nginx_installation(){
             --with-openssl-opt=no-nextprotoneg \
             --with-debug
     
+    # Running making command
+    echo "******** Running making command - NGINX"
     sudo make
+    # Running make install command
+    echo "******** Running make install command - NGINX"
     sudo make install
+    # Running nginx
+    echo "******** Running NGINX"
     sudo nginx
 
     # Symlink /usr/lib/nginx/modules to /etc/nginx/modules directory. etc/nginx/modules is a standard place for NGINX modules:
