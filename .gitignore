@@ -65,7 +65,4 @@ ekpapalek/repo/ekpapalek/
 *.log
 
 *.ignore
-nginx/ubuntu/download/nginx-1.18.0.tar.gz
-nginx/ubuntu/download/openssl-1.1.1g.tar.gz
-nginx/ubuntu/download/pcre-8.44.tar.gz
-nginx/ubuntu/download/zlib-1.2.11.tar.gz
+nginx/ubuntu/download/
