@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 ## NGINX Installation
 ## Compiling and Installing from Source
@@ -127,6 +127,23 @@ nginx_installation(){
     # Running make install command
     echo "******** Running make install command - NGINX"
     sudo make install
+
+    # Symlink /usr/lib/nginx/modules to /etc/nginx/modules directory. etc/nginx/modules is a standard place for NGINX modules:
+    sudo ln -s /usr/lib/nginx/modules /etc/nginx/modules
+
+    echo "******** Check NGINX syntax and potential errors: "
+    if [[ "$(sudo nginx -t 2> /dev/null)" == "" ]]; then
+        
+        # Create NGINX cache directories and set proper permissions
+        echo "******** Create NGINX cache directories and set proper permissions"
+        sudo mkdir -p /var/cache/nginx/client_temp /var/cache/nginx/fastcgi_temp /var/cache/nginx/proxy_temp /var/cache/nginx/scgi_temp /var/cache/nginx/uwsgi_temp
+        sudo chmod 700 /var/cache/nginx/*
+        sudo chown vagrant:root /var/cache/nginx/*
+
+        # Re-check syntax and potential errors.
+        sudo nginx -t
+    fi
+
     # Running nginx
     echo "******** Running NGINX"
     sudo nginx
