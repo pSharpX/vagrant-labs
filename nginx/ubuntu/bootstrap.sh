@@ -144,10 +144,6 @@ nginx_installation(){
         sudo nginx -t
     fi
 
-    # Running nginx
-    echo "******** Running NGINX"
-    sudo nginx
-
     # Symlink /usr/lib/nginx/modules to /etc/nginx/modules directory. etc/nginx/modules is a standard place for NGINX modules:
     sudo ln -s /usr/lib/nginx/modules /etc/nginx/modules
 }
@@ -211,6 +207,9 @@ EOF
 # Enable NGINX to start on boot and start NGINX immediately:
 echo "******** Enabling NGINX to start on boot and start NGINX immediately:"
 sudo systemctl enable nginx.service
+
+# Running nginx
+echo "******** Running NGINX"
 sudo systemctl start nginx.service
 
 # Check if NGINX will automatically initiate after a reboot
