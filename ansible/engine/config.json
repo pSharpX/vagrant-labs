@@ -1,0 +1,58 @@
+{
+    "vms": [
+        {
+            "box": "archlinux/archlinux",
+            "name": "ansible_vm",
+            "hostname": "ansible_machine",
+            "network": {
+                "private_network": "192.168.33.28",
+                "forwarded_port": []
+            },
+            "synced_folder": [
+                {
+                    "source": "/machines/ansible",
+                    "target": "vagrant_ansible",
+                    "create": true
+                }
+            ]
+        },
+        {
+            "box": "archlinux/archlinux",
+            "name": "web_server",
+            "hostname": "web_machine",
+            "network": {
+                "private_network": "192.168.33.26",
+                "forwarded_port": [
+                    {
+                        "guest": "80",
+                        "host": "8080"
+                    }
+                ]
+            },
+            "synced_folder": [
+                {
+                    "source": "/machines/web",
+                    "target": "vagrant_web",
+                    "create": true
+                }
+            ]
+        },
+        {
+            "box": "archlinux/archlinux",
+            "name": "db_server",
+            "hostname": "database_server",
+            "network": {
+                "private_network": "192.168.33.27",
+                "forwarded_port": []
+            },
+            "synced_folder": [
+                {
+                    "source": "/machines/database",
+                    "target": "vagrant_web",
+                    "create": true
+                }
+            ]
+        }
+    ],
+    "box": "archlinux/archlinux"
+}
