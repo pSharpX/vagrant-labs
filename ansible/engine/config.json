@@ -1,27 +1,11 @@
 {
     "vms": [
         {
-            "box": "archlinux/archlinux",
-            "name": "ansible_vm",
-            "hostname": "ansible_machine",
-            "network": {
-                "private_network": "192.168.33.28",
-                "forwarded_port": []
-            },
-            "synced_folder": [
-                {
-                    "source": "/machines/ansible",
-                    "target": "vagrant_ansible",
-                    "create": true
-                }
-            ]
-        },
-        {
-            "box": "archlinux/archlinux",
+            "box": "ubuntu/bionic64",
             "name": "web_server",
-            "hostname": "web_machine",
+            "hostname": "webserver",
             "network": {
-                "private_network": "192.168.33.26",
+                "private_network": "192.168.99.101",
                 "forwarded_port": [
                     {
                         "guest": "80",
@@ -31,28 +15,140 @@
             },
             "synced_folder": [
                 {
-                    "source": "/machines/web",
-                    "target": "vagrant_web",
+                    "source": "./machines/web",
+                    "target": "/vagrant_web",
                     "create": true
                 }
-            ]
+            ],
+            "chosen_provider": "virtualbox",
+            "provider": {
+                "virtualbox": {
+                    "modifyvm": [
+                        {
+                            "key": "name",
+                            "value": "web_server"
+                        },
+                        {
+                            "key": "memory",
+                            "value": 1024
+                        },
+                        {
+                            "key": "cpus",
+                            "value": 1
+                        },
+                        {
+                            "key": "uart1",
+                            "value": "0x3F8",
+                            "arg": "4"
+                        },
+                        {
+                            "key": "uartmode1",
+                            "value": "file",
+                            "arg": "NUL"
+                        }
+                    ]
+                }
+            },
+            "provision": {},
+            "ssh": {},
+            "vagrant": {}
         },
         {
             "box": "archlinux/archlinux",
-            "name": "db_server",
-            "hostname": "database_server",
+            "name": "database_server",
+            "hostname": "databaseserver",
             "network": {
-                "private_network": "192.168.33.27",
+                "private_network": "192.168.99.102",
                 "forwarded_port": []
             },
             "synced_folder": [
                 {
-                    "source": "/machines/database",
-                    "target": "vagrant_web",
+                    "source": "./machines/database",
+                    "target": "/vagrant_web",
                     "create": true
                 }
-            ]
+            ],
+            "chosen_provider": "virtualbox",
+            "provider": {
+                "virtualbox": {
+                    "modifyvm": [
+                        {
+                            "key": "name",
+                            "value": "database_server"
+                        },
+                        {
+                            "key": "memory",
+                            "value": 1024
+                        },
+                        {
+                            "key": "cpus",
+                            "value": 1
+                        }
+                    ]
+                }
+            },
+            "provision": {},
+            "ssh": {},
+            "vagrant": {}
+        },
+        {
+            "box": "ubuntu/bionic64",
+            "name": "ansible_server",
+            "hostname": "ansibleserver",
+            "network": {
+                "private_network": "192.168.99.100",
+                "forwarded_port": []
+            },
+            "synced_folder": [
+                {
+                    "source": "./machines/ansible",
+                    "target": "/vagrant_ansible",
+                    "create": true,
+                    "owner": "root",
+                    "group": "root"
+                }
+            ],
+            "chosen_provider": "virtualbox",
+            "provider": {
+                "virtualbox": {
+                    "modifyvm": [
+                        {
+                            "key": "name",
+                            "value": "ansible_server"
+                        },
+                        {
+                            "key": "memory",
+                            "value": 1024
+                        },
+                        {
+                            "key": "cpus",
+                            "value": 1
+                        }
+                    ]
+                }
+            },
+            "provision": {
+                "file": {
+                    "source": "ansible.cfg",
+                    "destination": "ansible.cfg"
+                },
+                "ansible_local": {
+                    "install": true,
+                    "playbook": "./controller/playbook.yml",
+                    "install_mode ": "default",
+                    "pip_install_cmd": "",
+                    "version": "latest",
+                    "verbose": true,
+                    "provisioning_path": "/vagrant",
+                    "inventory_path": "inventory",
+                    "limit": "all"
+                }
+            },
+            "ssh": {},
+            "vagrant": {}
         }
     ],
-    "box": "archlinux/archlinux"
+    "box": "archlinux/archlinux",
+    "ssh": {},
+    "vagrant": {}
 }

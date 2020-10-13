@@ -9,7 +9,6 @@
 require 'json'
 
 dir = File.dirname(File.expand_path(__FILE__))
-
 file = File.read("#{dir}/config.json")
 data = JSON.parse(file)
 vms = data['vms']
@@ -26,9 +25,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   # config.vm.usable_port_range = (10200..10500)
-
-  vms.each do |i, vm|
-    config.vm.define vm["name"] do |node|
+  vms.each do |vm|
+    config.vm.define "#{vm["name"]}" do |node|
       # node.vm.network "forwarded_port", guest: 8080, host: 8080, auto_correct: true
       # node.vm.network "private_network", type: "dhcp"
       node.vm.network "public_network"
@@ -51,70 +49,111 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         node.vm.network "private_network", ip: "#{vm['network']['private_network']}"
       end
     
-      vm['network']['forwarded_port'].each do |i, port|
+      vm['network']['forwarded_port'].each do |port|
         if port['guest'] != '' && port['host'] != ''
           node.vm.network :forwarded_port, guest: port['guest'].to_i, host: port['host'].to_i
         end
       end
 
-      vm['synced_folder'].each do |i, folder|
+      vm['synced_folder'].each do |folder|
         if folder['source'] != '' && folder['target'] != ''
-          if folder['create'] == true
-            config.vm.synced_folder "#{folder['source']}", "#{folder['target']}", id: "#{i}", create: true
+          if !folder['owner'].nil? && !folder['owner'].empty?
+            node.vm.synced_folder "#{folder['source']}", "#{folder['target']}", create: true, owner: folder['owner'], group: folder['group']
+          elsif folder['create'] == true
+            node.vm.synced_folder "#{folder['source']}", "#{folder['target']}", create: true
           else
-            config.vm.synced_folder "#{folder['source']}", "#{folder['target']}", id: "#{i}"
+            node.vm.synced_folder "#{folder['source']}", "#{folder['target']}"
+          end
+
+        end
+      end
+
+      if vm['chosen_provider'].empty? || vm['chosen_provider'] == "virtualbox"
+        ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
+        
+        node.vm.provider :virtualbox do |vbox|
+          vm['provider']['virtualbox']['modifyvm'].each do |option|
+            if option["key"] == "natdnshostresolver1"
+              value = value ? "on" : "off"
+            end
+
+            if !option["arg"].nil? && !option["arg"].empty?
+              vbox.customize ["modifyvm", :id, "--#{option["key"]}", "#{option["value"]}", "#{option["arg"]}" ]
+              next
+            end
+
+            vbox.customize ["modifyvm", :id, "--#{option["key"]}", "#{option["value"]}"]
           end
         end
       end
 
-      node.vm.provider "virtualbox" do |vb|
-        vb.cpus = 1
-        vb.memory = "1024"
-        vb.name = "#{vm["name"]}"
-      end
-    end
-  end
+      vm['provision'].each do |key, value|
+        if key == 'ansible_local'
+          node.vm.provision :ansible_local do |ansible|
+            # ansible.limit          = "all" # or only "nodes" group, etc.
+            if !value["playbook"].nil? && !value["playbook"].empty?
+              ansible.playbook = value["playbook"]
+            end
 
-  if data['vm']['chosen_provider'].empty? || data['vm']['chosen_provider'] == "virtualbox"
-    ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
+            if !value["install"].nil?
+              ansible.install = value["install"]
+            end
 
-    config.vm.provider :virtualbox do |virtualbox|
-      data['vm']['provider']['virtualbox']['modifyvm'].each do |key, value|
-        if key == "memory"
-          next
-        end
+            if !value["verbose"].nil?
+              ansible.verbose = value["verbose"]
+            end
 
-        if key == "natdnshostresolver1"
-          value = value ? "on" : "off"
-        end
+            if !value["install_mode"].nil? && !value["install_mode"].empty?
+              ansible.install_mode = value["install_mode"]
+            end
 
-        virtualbox.customize ["modifyvm", :id, "--#{key}", "#{value}"]
-      end
-
-      virtualbox.customize ["modifyvm", :id, "--memory", "#{data['vm']['memory']}"]
-    end
-  end
+            if !value["pip_install_cmd"].nil? && !value["pip_install_cmd"].empty?
+              ansible.pip_install_cmd = value["pip_install_cmd"]
+            end
   
+            if !value["version"].nil? && !value["version"].empty?
+              ansible.version = value["version"]
+            end
+  
+            if !value["inventory_path"].nil? && !value["inventory_path"].empty?
+              ansible.inventory_path = value["inventory_path"]
+            end
+
+            if !value["limit"].nil? && !value["limit"].empty?
+              ansible.limit = value["limit"]
+            end
+          end
+        end
+
+        if key == 'shell'
+          node.vm.provision :shell do |s|
+            s.path = value["args"]
+            if !value["args"].nil? && !value["args"].empty?
+              s.args = value["args"]
+            end
+          end
+        end
+
+        if key == 'file'
+          node.vm.provision "file", source: value["source"], destination: value["destination"]
+        end
+      end
+
+    end
+
+  end
+
   ssh_username = !data['ssh']['username'].nil? ? data['ssh']['username'] : "vagrant"
 
-  # config.vm.provision "shell" do |s|
-  #   s.path = "puphpet/shell/initial-setup.sh"
-  #   s.args = "/vagrant/puphpet"
-  # end
-  # config.vm.provision "shell" do |kg|
-  #   kg.path = "puphpet/shell/ssh-keygen.sh"
-  #   kg.args = "#{ssh_username}"
-  # end
-  # config.vm.provision :shell, :path => "puphpet/shell/update-puppet.sh"
-  # config.vm.provision :shell, :path => "puphpet/shell/execute-files.sh"
-  # config.vm.provision :shell, :path => "puphpet/shell/important-notices.sh"
+  config.ssh.insert_key = false
+  config.vm.provision "file", source: "./ssh/id_rsa.pub", destination: "~/.ssh/authorized_keys"
 
-  # if File.file?("#{dir}/puphpet/files/dot/ssh/id_rsa")
-  #   config.ssh.private_key_path = [
-  #     "#{dir}/puphpet/files/dot/ssh/id_rsa",
-  #     "#{dir}/puphpet/files/dot/ssh/insecure_private_key"
-  #   ]
-  # end
+  if File.file?("./ssh/id_rsa")
+    config.ssh.private_key_path = [
+      "./ssh/id_rsa",
+      "./ssh/insecure_private_key"
+    ]
+  end
 
   if !data['ssh']['host'].nil?
     config.ssh.host = "#{data['ssh']['host']}"

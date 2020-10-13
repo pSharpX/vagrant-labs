@@ -1,0 +1,9 @@
+---
+- name: Prueba Registry
+  hosts: all
+  tasks:
+  - name: Ejecutar commando
+    command: uptime
+    register: salida_uptime
+  - name: Mostrar comando
+    debug: var=salida_uptime.stdout_lines
