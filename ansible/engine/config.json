@@ -101,6 +101,12 @@
             },
             "synced_folder": [
                 {
+                    "source": "./",
+                    "target": "/vagrant",
+                    "create": true,
+                    "mount_options": ["dmode=775,fmode=600"]
+                },
+                {
                     "source": "./machines/ansible",
                     "target": "/vagrant_ansible",
                     "create": true,
@@ -128,9 +134,18 @@
                 }
             },
             "provision": {
-                "file": {
-                    "source": "ansible.cfg",
-                    "destination": "ansible.cfg"
+                "file": [
+                    {
+                        "source": "ansible.cfg",
+                        "destination": "~/.ansible.cfg"
+                    },
+                    {
+                        "source": "./ssh/id_rsa",
+                        "destination": "~/.ssh/id_rsa"
+                    }
+                ],
+                "shell": {
+                    "inline": "chown vagrant /home/vagrant/.ssh/id_rsa && chmod 400 /home/vagrant/.ssh/id_rsa"
                 },
                 "ansible_local": {
                     "install": true,

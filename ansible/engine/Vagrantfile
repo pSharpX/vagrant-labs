@@ -57,8 +57,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
       vm['synced_folder'].each do |folder|
         if folder['source'] != '' && folder['target'] != ''
-          if !folder['owner'].nil? && !folder['owner'].empty?
-            node.vm.synced_folder "#{folder['source']}", "#{folder['target']}", create: true, owner: folder['owner'], group: folder['group']
+          
+          if !folder['mount_options'].nil? && !folder['mount_options'].empty?
+            node.vm.synced_folder "#{folder['source']}", "#{folder['target']}", create: true, owner: folder['owner'], group: folder['group'], mount_options: ["dmode=775,fmode=600"]
+          elsif !folder['owner'].nil? && !folder['owner'].empty?
+              node.vm.synced_folder "#{folder['source']}", "#{folder['target']}", create: true, owner: folder['owner'], group: folder['group']
           elsif folder['create'] == true
             node.vm.synced_folder "#{folder['source']}", "#{folder['target']}", create: true
           else
@@ -90,7 +93,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       vm['provision'].each do |key, value|
         if key == 'ansible_local'
           node.vm.provision :ansible_local do |ansible|
-            # ansible.limit          = "all" # or only "nodes" group, etc.
             if !value["playbook"].nil? && !value["playbook"].empty?
               ansible.playbook = value["playbook"]
             end
@@ -125,17 +127,22 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           end
         end
 
-        if key == 'shell'
-          node.vm.provision :shell do |s|
-            s.path = value["args"]
-            if !value["args"].nil? && !value["args"].empty?
-              s.args = value["args"]
-            end
+        if key == 'shell' 
+          if !value["inline"].nil? && !value["inline"].empty?
+            node.vm.provision "shell", inline: value["inline"], args: value["args"]
+            
+          end
+
+          if !value["path"].nil? && !value["path"].empty?
+            node.vm.provision "shell", inline: value["path"], args: value["args"]
           end
         end
+        
 
         if key == 'file'
-          node.vm.provision "file", source: value["source"], destination: value["destination"]
+          value.each do |file|
+            node.vm.provision "file", source: file["source"], destination: file["destination"]
+          end
         end
       end
 
