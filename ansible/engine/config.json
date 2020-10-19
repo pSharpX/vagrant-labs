@@ -110,8 +110,8 @@
                     "source": "./machines/ansible",
                     "target": "/vagrant_ansible",
                     "create": true,
-                    "owner": "root",
-                    "group": "root"
+                    "owner": "vagrant",
+                    "group": "vagrant"
                 }
             ],
             "chosen_provider": "virtualbox",
