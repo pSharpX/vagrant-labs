@@ -1,6 +1,7 @@
 ---
 - name: Prueba Registry
   hosts: all
+  gather_facts: true
   tasks:
   - name: Ejecutar commando
     command: uptime
