@@ -130,11 +130,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         if key == 'shell' 
           if !value["inline"].nil? && !value["inline"].empty?
             node.vm.provision "shell", inline: value["inline"], args: value["args"]
-            
           end
 
           if !value["path"].nil? && !value["path"].empty?
-            node.vm.provision "shell", inline: value["path"], args: value["args"]
+            node.vm.provision "shell", path: value["path"], args: value["args"]
           end
         end
         

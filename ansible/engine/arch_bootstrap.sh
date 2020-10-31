@@ -5,15 +5,17 @@ PROVISIONED_ON=/etc/vm_provision_on_timestamp
 if [ -f "$PROVISIONED_ON" ]
 then
   echo "VM was already provisioned at: $(cat $PROVISIONED_ON)"
-  echo "To run system updates manually login via 'vagrant ssh' and run 'yum check-update && yum -y update'"
+  echo "To run system updates manually login via 'vagrant ssh' and run 'pacman -Syu'"
   exit
 fi
 
+sudo pacman-key --init
+sudo pacman-key --populate
+sudo pacman-key --refresh-keys
+sudo pacman -Sy archlinux-keyring --noconfirm
 
 # Update package list and upgrade all packages
-yum check-update
-yum clean all
-yum -y update
+sudo pacman -Syu --noconfirm
 
 # Tag the provision time:
 date > "$PROVISIONED_ON"

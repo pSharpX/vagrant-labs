@@ -87,7 +87,11 @@
                     ]
                 }
             },
-            "provision": {},
+            "provision": {
+                "shell": {
+                    "path": "./arch_bootstrap.sh"
+                }
+            },
             "ssh": {},
             "vagrant": {}
         },
@@ -164,6 +168,8 @@
         }
     ],
     "box": "archlinux/archlinux",
-    "ssh": {},
+    "ssh": {
+        "forward_agent": false
+    },
     "vagrant": {}
 }
