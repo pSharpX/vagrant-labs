@@ -1,0 +1,13 @@
+---
+- name: Tools and Configs
+  hosts: servers
+  become: yes
+  gather_facts: true
+  tasks:
+    - name: Vim and Net-Tools Installation
+      pacman:
+        name:
+          - vim
+          - net-tools
+        state: latest
+      when: ansible_distribution == "Archlinux"

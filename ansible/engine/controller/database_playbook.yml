@@ -4,34 +4,91 @@
   become: yes
   gather_facts: true
   vars:
-    mysql_root_password: "Password1"
+    mysql_root_password: "admin123"
   tasks:
-    # - name: Upgrade packages
-    #  pacman:
-    #    update_cache: yes
-    #    upgrade: yes
-    - name: install mariadb
+    - name: MariaDB Installation
       pacman:
         name:
+          - python-pip
           - mariadb
-          - python3-PyMySQL
         state: latest
-    - name: start mariadb
+      when: ansible_distribution == "Archlinux"
+      register: arch_mariadb_install_packages
+    - name: Python-pip module Installation
+      pacman:
+        name:
+          - python-pip
+        state: latest
+      when: ansible_distribution == "Archlinux"
+    - name: Make sure PyMSQL is present
+      pip:
+        name: pymysql
+        state: present
+    - name: Run mysql_install_db if MySQL packages were changed.
+      command: mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
+      when: arch_mariadb_install_packages.changed
+    - name: Start MariaDB
       service:
         name: mariadb
         enabled: true
         state: started
-    - name: mysql_root_password
+    - name: Replace MySQL server.cnf file
+      copy:
+        src: /vagrant/machines/ansible/server.cnf
+        dest: /etc/my.cnf.d/server.cnf
+        owner: root
+        group: root
+        mode: 0644
+    - name: Start MariaDB
+      service:
+        name: mariadb
+        state: restarted
+    #- name: Updating root user account
+    #  mysql_user:
+    #    login_user: root
+    #    user: root
+    #    login_unix_socket: /run/mysqld/mysqld.sock
+    #    check_implicit_admin: true
+    #    password: "{{ mysql_root_password }}"
+    #    host: localhost
+    # Create database user with name 'admin' and previously hashed mysql native password '*01A6717B58FF5C7EAFFF6CB7C96F7428EA65FE4C' with all database privileges
+
+    - name: Setting admin user account
       mysql_user:
         login_user: root
         login_password: "{{ mysql_root_password }}"
-        user: root
+        login_unix_socket: /run/mysqld/mysqld.sock
+        user: admin
         check_implicit_admin: true
-        password: "{{ mysql_root_password }}"
+        password: '*01A6717B58FF5C7EAFFF6CB7C96F7428EA65FE4C' #(admin123)
+        encrypted: yes
+        priv: '*.*:ALL'
         host: localhost
-    - name: remove remote root
+    - name: Setting read-only user account
       mysql_user:
-        check_implicit_admin: true
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+        login_unix_socket: /run/mysqld/mysqld.sock
+        user: user
+        password: 'user123'
+        priv: '*.*:SELECT'
+        host: '%'
+    - name: Setting read-only single-database-access user account
+      mysql_user:
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+        user: ecommerce_user
+        password: 'user123.ecommerce'
+        priv: '*ecommerce_db.*:SELECT'
+    - name: Removes anonymous user account
+      mysql_user:
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+        name: ''
+        host_all: true
+        state: absent
+    - name: Removes remote root
+      mysql_user:
         login_user: root
         login_password: "{{ mysql_root_password }}"
         user: root
