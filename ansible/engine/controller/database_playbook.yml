@@ -39,36 +39,40 @@
         owner: root
         group: root
         mode: 0644
-    - name: Start MariaDB
-      service:
-        name: mariadb
-        state: restarted
-    #- name: Updating root user account
-    #  mysql_user:
-    #    login_user: root
-    #    user: root
-    #    login_unix_socket: /run/mysqld/mysqld.sock
-    #    check_implicit_admin: true
-    #    password: "{{ mysql_root_password }}"
-    #    host: localhost
-    # Create database user with name 'admin' and previously hashed mysql native password '*01A6717B58FF5C7EAFFF6CB7C96F7428EA65FE4C' with all database privileges
+      notify: restart_service_mariadb
 
+    - name: Updating root user account
+      mysql_user:
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+        user: root
+        login_unix_socket: /run/mysqld/mysqld.sock
+        check_implicit_admin: true
+        password: "{{ mysql_root_password }}"
+        priv: '*.*:ALL,GRANT'
+        host: "{{ item }}"
+      with_items:
+        - "{{ ansible_hostname }}"
+        - 127.0.0.1
+        - ::1
+        - "localhost"
+
+    # Create database user with name 'admin' and previously hashed mysql native password '*01A6717B58FF5C7EAFFF6CB7C96F7428EA65FE4C' with all database privileges
     - name: Setting admin user account
       mysql_user:
         login_user: root
         login_password: "{{ mysql_root_password }}"
-        login_unix_socket: /run/mysqld/mysqld.sock
         user: admin
         check_implicit_admin: true
         password: '*01A6717B58FF5C7EAFFF6CB7C96F7428EA65FE4C' #(admin123)
         encrypted: yes
         priv: '*.*:ALL'
         host: localhost
+
     - name: Setting read-only user account
       mysql_user:
         login_user: root
         login_password: "{{ mysql_root_password }}"
-        login_unix_socket: /run/mysqld/mysqld.sock
         user: user
         password: 'user123'
         priv: '*.*:SELECT'
@@ -94,3 +98,8 @@
         user: root
         host: "{{ ansible_fqdn }}"
         state: absent
+  handlers:
+    - name: restart_service_mariadb
+      service:
+        name: mariadb
+        state: restarted
