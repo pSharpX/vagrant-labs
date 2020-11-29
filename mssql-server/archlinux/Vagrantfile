@@ -92,8 +92,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   #   apt-get install -y apache2
   # SHELL
 
+  $build_yay = <<-SCRIPT
+  echo "******** Installing Yay(AUR Helper)..."
+  cd yay
+  makepkg -sri --noconfirm
+  SCRIPT
+
   config.vm.provision :shell, path: "disk-extend-btrfs.sh"
-  config.vm.provision :shell, path: "bootstrap.sh"
-  config.vm.provision :shell, path: "mssql-server.sh"
+  config.vm.provision :shell, path: "bootstrap.sh", privileged: false
+  ## config.vm.provision :shell, inline: $build_yay, privileged: false
+  config.vm.provision :shell, path: "mssql-server.sh", privileged: false
 
 end

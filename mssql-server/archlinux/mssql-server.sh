@@ -41,6 +41,8 @@ install_mssql_server(){
 }
 
 install_mssql_tools(){
+  # Install MS SQL Server Tools
+  echo "******** Installing MS SQL Server Tools"
   
 }
 

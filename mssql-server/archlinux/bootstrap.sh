@@ -14,10 +14,14 @@ install_yay_dependencies(){
   sudo pacman -S base-devel --noconfirm
 }
 
-install_yay(){
-  echo "******** Installing Yay(AUR Helper)..."
-  
+download_yay(){
+  echo "******** Downloading Yay(AUR Helper)..."
   git clone https://aur.archlinux.org/yay.git
+
+  # We cannot install YAY as a root user neither install YAY packages
+  sudo chown -R vagrant /home/vagrant/yay
+  sudo chmod 775 /home/vagrant/yay
+  
   cd yay
   makepkg -sri --noconfirm
 }
@@ -47,7 +51,7 @@ install_yay_dependencies
 
 # Yay(AUR Helper) Installation
 echo "******** Yay(AUR Helper) installation..."
-install_yay
+download_yay
 
 # Tag the provision time:
 date > "$PROVISIONED_ON"
