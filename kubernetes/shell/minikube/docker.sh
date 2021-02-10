@@ -13,8 +13,8 @@ docker_installation(){
 }
 
 docker_machine_installation(){
-  base=https://github.com/docker/machine/releases/download/v0.16.0 &&
-  curl -L $base/docker-machine-$(uname -s)-$(uname -m) >/tmp/docker-machine &&
+  DOCKER_MACHINE_URL=https://github.com/docker/machine/releases/download/v0.16.0 &&
+  curl -sL $DOCKER_MACHINE_URL/docker-machine-$(uname -s)-$(uname -m) >/tmp/docker-machine &&
   sudo mv /tmp/docker-machine /usr/local/bin/docker-machine &&
   chmod +x /usr/local/bin/docker-machine
 }
