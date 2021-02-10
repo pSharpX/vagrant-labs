@@ -1,0 +1,71 @@
+{
+    "vms": [
+        {
+            "box": "ubuntu/bionic64",
+            "name": "minikube_server",
+            "hostname": "minikubeserver",
+            "network": {
+                "private_network": "192.168.99.101",
+                "forwarded_port": []
+            },
+            "synced_folder": [
+                {
+                    "source": "./resources",
+                    "target": "/resources",
+                    "create": true
+                }
+            ],
+            "chosen_provider": "virtualbox",
+            "provider": {
+                "virtualbox": {
+                    "modifyvm": [
+                        {
+                            "key": "name",
+                            "value": "minikube_server"
+                        },
+                        {
+                            "key": "memory",
+                            "value": 4096
+                        },
+                        {
+                            "key": "cpus",
+                            "value": 4
+                        },
+                        {
+                            "key": "uart1",
+                            "value": "0x3F8",
+                            "arg": "4"
+                        },
+                        {
+                            "key": "uartmode1",
+                            "value": "file",
+                            "arg": "NUL"
+                        }
+                    ]
+                }
+            },
+            "provision": {
+                "shell": {
+                    "path": [
+                        {
+                            "path": "./bootstrap.sh"
+                        },
+                        {
+                            "path": "./docker.sh"
+                        },
+                        {
+                            "path": "./minikube.sh"
+                        }
+                    ]
+                }
+            },
+            "ssh": {},
+            "vagrant": {}
+        }
+    ],
+    "box": "ubuntu/bionic64",
+    "ssh": {
+        "forward_agent": false
+    },
+    "vagrant": {}
+}
