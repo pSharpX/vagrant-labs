@@ -15,9 +15,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   db_vm_ip = ENV['APP_DATABASE_HOST']
   db_vm_port = ENV.fetch('APP_DATABASE_PORT', 5432).to_i
   db_vm_name = "#{VAGRANTFILE_PROJECT_NAME}_db_#{VAGRANTFILE_ENV}_environment"
-  web_vm_ip = ENV['APP_WEB_HOST']
-  web_vm_port = ENV.fetch('APP_WEB_PORT', 8000).to_i
-  web_vm_name = "#{VAGRANTFILE_PROJECT_NAME}_web_#{VAGRANTFILE_ENV}_environment"
   
   # The most common configuration options are documented and commented below.
   # For a complete reference, please see the online documentation at
@@ -90,46 +87,21 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   #   apt-get install -y apache2
   # SHELL
 
-  config.vm.define "web", primary: true do |web|
-    web.vm.hostname = 'web'
-    web.vm.network "forwarded_port", guest: 8000, host: web_vm_port,
-      auto_correct: true
-    web.vm.network "private_network", ip: web_vm_ip
-    web.vm.network "public_network"
-    web.vm.synced_folder "./repo", "/repo", create: true
-    web.vm.provision :shell, path: "build-web.sh", 
-      env: {
-        "GIT_REPOSITORY" => ENV['GIT_REPOSITORY'],
-        "APP_DATABASE_NAME" => ENV['APP_DATABASE_NAME'],
-        "APP_DATABASE_USER" => ENV['APP_DATABASE_USER'],
-        "APP_DATABASE_PASS" => "\\#{ENV['APP_DATABASE_PASS']}",
-        "APP_DATABASE_HOST" => ENV['APP_DATABASE_HOST'],
-        "APP_DATABASE_PORT" => ENV['APP_DATABASE_PORT'],
-        "APP_WEB_PORT" => ENV['APP_WEB_PORT']
-      }
-
-    web.vm.provider "virtualbox" do |vb|
-      vb.cpus = 2
-      vb.memory = "2048"
-      vb.name = web_vm_name
-    end
-  end
-
   config.vm.define "db", autostart: false do |db|
     db.vm.hostname = 'db'
-    db.vm.network "forwarded_port", guest: 5432, host: db_vm_port
+    db.vm.network "forwarded_port", guest: 3306, host: db_vm_port
     db.vm.network "private_network", ip: db_vm_ip
     db.vm.synced_folder "./data", "/data", create: true
-    db.vm.provision :shell, path: "build-db.sh", 
+    db.vm.provision :shell, path: "build-db.sh",
       env: {
         "APP_DATABASE_USER" => ENV['APP_DATABASE_USER'],
-        "APP_DATABASE_PASS" => "\\#{ENV['APP_DATABASE_PASS']}",
+        "APP_DATABASE_PASS" => ENV['APP_DATABASE_PASS'],
         "APP_DATABASE_NAME" => ENV['APP_DATABASE_NAME'],
         "APP_DATABASE_PORT" => ENV['APP_DATABASE_PORT']
       }
 
     db.vm.provider "virtualbox" do |vb|
-      vb.cpus = 1
+      vb.cpus = 2
       vb.memory = "1024"
       vb.name = db_vm_name
     end
