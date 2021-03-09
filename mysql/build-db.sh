@@ -93,6 +93,15 @@ sudo mysql -V
 # Configuration
 ###########################################################
 
+MDB_CONF="/etc/mysql/mariadb.conf.d/50-server.cnf"
+
+# Edit 50-server.conf to change listen address to '*':
+sudo sed -i "s/.*bind-address.*/bind-address          = 0.0.0.0/" "$MDB_CONF"
+
+# Restart so that all new config is loaded:
+sudo systemctl restart mariadb
+
+
 # Make sure that NOBODY can access the server without a password
 echo "Configuring users and databases"
 sudo mysql -e "UPDATE mysql.user SET Password = PASSWORD('$APP_DB_PASS') WHERE User = 'root'"
@@ -114,9 +123,15 @@ echo "Creating $APP_DATABASE_USER and grant all permissions to $APP_DATABASE_NAM
 sudo mysql -e "CREATE USER IF NOT EXISTS '$APP_DATABASE_USER'@'localhost' IDENTIFIED BY '$APP_DATABASE_PASS'"
 sudo mysql -e "GRANT ALL PRIVILEGES ON $APP_DATABASE_NAME.* to '$APP_DATABASE_USER'@'localhost'"
 
+sudo mysql -e "CREATE USER IF NOT EXISTS '$APP_DATABASE_USER'@'192.168.99.%' IDENTIFIED BY '$APP_DATABASE_PASS'"
+sudo mysql -e "GRANT ALL PRIVILEGES ON $APP_DATABASE_NAME.* to '$APP_DATABASE_USER'@'192.168.99.%'"
+
 echo "Creating production_user and grant all permissions to production database..." 
 sudo mysql -e "CREATE USER IF NOT EXISTS 'production_user'@'localhost' IDENTIFIED BY '$APP_DATABASE_PASS'"
 sudo mysql -e "GRANT ALL PRIVILEGES ON production.* to 'production_user'@'localhost'"
+
+sudo mysql -e "CREATE USER IF NOT EXISTS 'production_user'@'192.168.99.%' IDENTIFIED BY '$APP_DATABASE_PASS'"
+sudo mysql -e "GRANT ALL PRIVILEGES ON production.* to 'production_user'@'192.168.99.%'"
  
 # Make our changes take effect
 sudo mysql -e "FLUSH PRIVILEGES"
