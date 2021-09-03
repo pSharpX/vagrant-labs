@@ -1,0 +1,117 @@
+{
+    "vms": [
+        {
+            "box": "centos/7",
+            "name": "node1",
+            "hostname": "kube-node1.ose.pe",
+            "network": {
+                "private_network": "192.168.99.101",
+                "forwarded_port": []
+            },
+            "synced_folder": [],
+            "chosen_provider": "virtualbox",
+            "provider": {
+                "virtualbox": {
+                    "modifyvm": [
+                        {
+                            "key": "name",
+                            "value": "kube-node1"
+                        },
+                        {
+                            "key": "memory",
+                            "value": 2048
+                        },
+                        {
+                            "key": "cpus",
+                            "value": 2
+                        }
+                    ]
+                }
+            },
+            "provision": {
+                "shell": {
+                    "path": "./bootstrap.sh"
+                }
+            },
+            "ssh": {},
+            "vagrant": {}
+        },
+        {
+            "box": "centos/7",
+            "name": "node2",
+            "hostname": "kube-node2.ose.pe",
+            "network": {
+                "private_network": "192.168.99.102",
+                "forwarded_port": []
+            },
+            "synced_folder": [],
+            "chosen_provider": "virtualbox",
+            "provider": {
+                "virtualbox": {
+                    "modifyvm": [
+                        {
+                            "key": "name",
+                            "value": "kube-node2"
+                        },
+                        {
+                            "key": "memory",
+                            "value": 2048
+                        },
+                        {
+                            "key": "cpus",
+                            "value": 2
+                        }
+                    ]
+                }
+            },
+            "provision": {
+                "shell": {
+                    "path": "./bootstrap.sh"
+                }
+            },
+            "ssh": {},
+            "vagrant": {}
+        },
+        {
+            "box": "centos/7",
+            "name": "master",
+            "hostname": "kube-master.ose.pe",
+            "network": {
+                "private_network": "192.168.99.100",
+                "forwarded_port": []
+            },
+            "synced_folder": [],
+            "chosen_provider": "virtualbox",
+            "provider": {
+                "virtualbox": {
+                    "modifyvm": [
+                        {
+                            "key": "name",
+                            "value": "kube-master"
+                        },
+                        {
+                            "key": "memory",
+                            "value": 4096
+                        },
+                        {
+                            "key": "cpus",
+                            "value": 2
+                        }
+                    ]
+                }
+            },
+            "provision": {
+                "shell": {
+                    "path": "./bootstrap.sh"
+                }
+            },
+            "ssh": {},
+            "vagrant": {}
+        }
+    ],
+    "box": "centos/7",
+    "ssh": {
+        "forward_agent": false
+    },
+    "vagrant": {}
+}
