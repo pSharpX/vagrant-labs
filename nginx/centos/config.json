@@ -1,0 +1,113 @@
+{
+    "vms": [
+        {
+            "box": "centos/7",
+            "name": "node1",
+            "hostname": "nginx-node1.ose.pe",
+            "network": {
+                "private_network": "192.168.99.111",
+                "forwarded_port": []
+            },
+            "synced_folder": [],
+            "chosen_provider": "virtualbox",
+            "provider": {
+                "virtualbox": {
+                    "modifyvm": [
+                        {
+                            "key": "name",
+                            "value": "nginx-node1"
+                        },
+                        {
+                            "key": "memory",
+                            "value": 2048
+                        },
+                        {
+                            "key": "cpus",
+                            "value": 2
+                        }
+                    ]
+                }
+            },
+            "provision": {
+                "shell": {
+                    "path": "./node.sh"
+                }
+            },
+            "ssh": {},
+            "vagrant": {}
+        },
+        {
+            "box": "centos/7",
+            "name": "node2",
+            "hostname": "nginx-node2.ose.pe",
+            "network": {
+                "private_network": "192.168.99.112",
+                "forwarded_port": []
+            },
+            "synced_folder": [],
+            "chosen_provider": "virtualbox",
+            "provider": {
+                "virtualbox": {
+                    "modifyvm": [
+                        {
+                            "key": "name",
+                            "value": "nginx-node2"
+                        },
+                        {
+                            "key": "memory",
+                            "value": 2048
+                        },
+                        {
+                            "key": "cpus",
+                            "value": 2
+                        }
+                    ]
+                }
+            },
+            "provision": {},
+            "ssh": {},
+            "vagrant": {}
+        },
+        {
+            "box": "centos/7",
+            "name": "master",
+            "hostname": "nginx-master.ose.pe",
+            "network": {
+                "private_network": "192.168.99.110",
+                "forwarded_port": []
+            },
+            "synced_folder": [],
+            "chosen_provider": "virtualbox",
+            "provider": {
+                "virtualbox": {
+                    "modifyvm": [
+                        {
+                            "key": "name",
+                            "value": "nginx-master"
+                        },
+                        {
+                            "key": "memory",
+                            "value": 4096
+                        },
+                        {
+                            "key": "cpus",
+                            "value": 2
+                        }
+                    ]
+                }
+            },
+            "provision": {
+                "shell": {
+                    "path": "./master.sh"
+                }
+            },
+            "ssh": {},
+            "vagrant": {}
+        }
+    ],
+    "box": "centos/7",
+    "ssh": {
+        "forward_agent": false
+    },
+    "vagrant": {}
+}
