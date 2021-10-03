@@ -1,0 +1,8 @@
+---
+master_tools:
+  - yum-utils
+
+docker: 
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io

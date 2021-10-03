@@ -1,0 +1,8 @@
+---
+tools:
+  - vim
+  - net-tools
+
+firewall_services:
+  - http
+  - https
