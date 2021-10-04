@@ -19,12 +19,18 @@
         state: latest
       when: ansible_distribution == "CentOS"
     
+    - name: Enable Firewalld Service
+      service:
+        name: firewalld
+        state: started
+
     - name: Open Firewall for NGINX
       firewalld:
-        service: "{{ firewall_services }}"
+        service: "{{ item }}"
         permanent: yes
         state: enabled
-        inmediate: yes
+        immediate: yes
+      loop: "{{ firewall_services }}"
       notify: restart_nginx_service
       
 
