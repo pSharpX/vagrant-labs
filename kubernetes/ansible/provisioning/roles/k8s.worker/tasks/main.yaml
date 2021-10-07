@@ -1,0 +1,21 @@
+---
+- name: Start and enable kubelet
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  loop: "{{ services }}"
+  register: svc_start
+
+- name: Copy token to worker nodes
+  copy:
+    src: ./{{ k8s_token }}
+    dest: /root/k8s_token
+
+- name: Join worker nodes to cluster
+  shell: |
+    kubeadm reset -f
+    cat /root/k8s_token | tail -2 > join_k8s.sh
+    sh join_k8s.sh
+  when: svc_start.changed
+  

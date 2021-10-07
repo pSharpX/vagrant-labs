@@ -1,0 +1,23 @@
+ansibleserver ansible_connection=local
+
+master      ansible_host=192.168.99.111
+worker01    ansible_host=192.168.99.114
+worker02    ansible_host=192.168.99.115
+
+[nodo1]
+worker01
+
+[nodo2]
+worker02
+
+
+[master-nodes-k8s]
+master
+
+[worker-nodes-k8s]
+worker01
+worker02
+
+[k8s-cluster:children]
+master-nodes-k8s
+worker-nodes-k8s

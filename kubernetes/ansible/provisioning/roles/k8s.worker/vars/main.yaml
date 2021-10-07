@@ -1,0 +1,4 @@
+services:
+- kubelet
+
+k8s_token: k8s_token

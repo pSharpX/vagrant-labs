@@ -1,0 +1,182 @@
+{
+    "vms": [
+        {
+            "box": "centos/7",
+            "name": "worker01",
+            "hostname": "k8s-worker01.ose.pe",
+            "network": {
+                "private_network": "192.168.99.114",
+                "forwarded_port": []
+            },
+            "synced_folder": [],
+            "chosen_provider": "virtualbox",
+            "provider": {
+                "virtualbox": {
+                    "modifyvm": [
+                        {
+                            "key": "name",
+                            "value": "k8s-worker01"
+                        },
+                        {
+                            "key": "memory",
+                            "value": 2048
+                        },
+                        {
+                            "key": "cpus",
+                            "value": 1
+                        }
+                    ]
+                }
+            },
+            "provision": {
+                "shell": {
+                    "path": "./config.sh"
+                }
+            },
+            "ssh": {},
+            "vagrant": {}
+        },
+        {
+            "box": "centos/7",
+            "name": "worker02",
+            "hostname": "k8s-worker02.ose.pe",
+            "network": {
+                "private_network": "192.168.99.115",
+                "forwarded_port": []
+            },
+            "synced_folder": [],
+            "chosen_provider": "virtualbox",
+            "provider": {
+                "virtualbox": {
+                    "modifyvm": [
+                        {
+                            "key": "name",
+                            "value": "k8s-worker02"
+                        },
+                        {
+                            "key": "memory",
+                            "value": 2048
+                        },
+                        {
+                            "key": "cpus",
+                            "value": 1
+                        }
+                    ]
+                }
+            },
+            "provision": {
+                "shell": {
+                    "path": "./config.sh"
+                }
+            },
+            "ssh": {},
+            "vagrant": {}
+        },
+        {
+            "box": "centos/7",
+            "name": "master",
+            "hostname": "k8s-master.ose.pe",
+            "network": {
+                "private_network": "192.168.99.111",
+                "forwarded_port": []
+            },
+            "synced_folder": [],
+            "chosen_provider": "virtualbox",
+            "provider": {
+                "virtualbox": {
+                    "modifyvm": [
+                        {
+                            "key": "name",
+                            "value": "k8s-master"
+                        },
+                        {
+                            "key": "memory",
+                            "value": 2048
+                        },
+                        {
+                            "key": "cpus",
+                            "value": 2
+                        }
+                    ]
+                }
+            },
+            "provision": {
+                "shell": {
+                    "path": "./config.sh"
+                }
+            },
+            "ssh": {},
+            "vagrant": {}
+        },
+        {
+            "box": "centos/7",
+            "name": "ansible",
+            "hostname": "ansible-server.ose.pe",
+            "network": {
+                "private_network": "192.168.99.110",
+                "forwarded_port": []
+            },
+            "synced_folder": [
+                {
+                    "source": "./",
+                    "target": "/vagrant",
+                    "create": true,
+                    "mount_options": ["dmode=775,fmode=600"]
+                }
+            ],
+            "chosen_provider": "virtualbox",
+            "provider": {
+                "virtualbox": {
+                    "modifyvm": [
+                        {
+                            "key": "name",
+                            "value": "ansible-server"
+                        },
+                        {
+                            "key": "memory",
+                            "value": 2048
+                        },
+                        {
+                            "key": "cpus",
+                            "value": 2
+                        }
+                    ]
+                }
+            },
+            "provision": {
+                "file": [
+                    {
+                        "source": "ansible.cfg",
+                        "destination": "~/.ansible.cfg"
+                    },
+                    {
+                        "source": "./ssh/id_rsa",
+                        "destination": "~/.ssh/id_rsa"
+                    }
+                ],
+                "shell": {
+                    "inline": "chown vagrant /home/vagrant/.ssh/id_rsa && chmod 600 /home/vagrant/.ssh/id_rsa",
+                    "path": "./config.sh"
+                },
+                "ansible_local": {
+                    "install": true,
+                    "playbook": "./provisioning/setup.yaml",
+                    "install_mode ": "default",
+                    "pip_install_cmd": "",
+                    "version": "latest",
+                    "verbose": true,
+                    "provisioning_path": "/vagrant",
+                    "inventory_path": "./provisioning/inventory",
+                    "limit": "all"
+                }
+            },
+            "ssh": {},
+            "vagrant": {}
+        }
+    ],
+    "box": "centos/7",
+    "ssh": {
+        "forward_agent": false
+    },
+    "vagrant": {}
+}

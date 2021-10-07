@@ -1,0 +1,35 @@
+---
+- name: Config kubernetes repository
+  yum_repository:
+    name: kubernetes
+    description: "Yum repository for Kubernetes"
+    baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-\$basearch
+    gpgcheck: yes
+    enabled: yes
+    repo_gpgcheck: yes
+    gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg, https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+  when: ansible_distribution == "CentOS"
+
+- name: Install required packages
+  yum:
+    name: "{{ packages }}"
+    state: present
+
+- name: Copy k8s.conf file to vms
+  copy:
+    src: k8s.conf
+    dest: "{{ kubernetes_config }}"
+  register: result
+
+- name: Load settings from all system configuration files
+  shell: sysctl --system
+  when: result.changed
+
+- name: Change docker cgroup
+  copy:
+    dest: "{{ docker_daemon }}"
+    src: daemon.json
+  notify: restart_docker_service
+
+- name: Force handler to execute
+  meta: flush_handlers

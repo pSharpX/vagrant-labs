@@ -1,0 +1,8 @@
+---
+dependency_tools:
+  - yum-utils
+
+packages: 
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io

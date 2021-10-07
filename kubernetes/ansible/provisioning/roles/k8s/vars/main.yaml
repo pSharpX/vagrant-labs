@@ -1,0 +1,12 @@
+packages:
+- kubelet
+- kubeadm
+- kubectl
+- iproute
+
+# Path for docker configuration directory
+docker_daemon: "/etc/docker/daemon.json"
+
+# Path for sysctl.d configuration directory
+kubernetes_config: "/etc/sysctl.d/k8s.conf"
+

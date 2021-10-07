@@ -1,0 +1,31 @@
+---
+- name: Tools Dependencies Installation
+  yum:
+    name: "{{ dependency_tools }}"
+    state: present
+  when: ansible_distribution == "CentOS"
+
+- name: Add Docker CE repository
+  get_url:
+    url: https://download.docker.com/linux/centos/docker-ce.repo
+    dest: /etc/yum.repos.d/docker-ce.repo
+  when: ansible_distribution == "CentOS"
+
+- name: Docker Installation
+  yum:
+    name: "{{ packages }}"
+    state: latest
+  when: ansible_distribution == "CentOS"
+
+- name: Start and enable Docker
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Add user vagrant to docker group
+  user:
+    name: vagrant
+    groups: 
+      - docker
+    append: yes

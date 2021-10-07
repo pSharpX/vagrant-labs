@@ -1,0 +1,69 @@
+---
+- name: Setup master hostname
+  hosts: master-nodes-k8s
+  vars_files:
+    - k8s_vars.yaml
+  become: true
+  tasks:
+    - import_role:
+        name: hostname
+      vars:
+        hostname: "{{ hostname_master }}"
+
+- name: Setup worker01 hostname
+  hosts: nodo1
+  vars_files:
+    - k8s_vars.yaml
+  become: true
+  tasks:
+    - import_role:
+        name: hostname
+      vars:
+        hostname: "{{ hostname_worker_1 }}"
+
+- name: Setup worker02 hostname
+  hosts: nodo2
+  vars_files:
+    - k8s_vars.yaml
+  become: true
+  tasks:
+    - import_role:
+        name: hostname
+      vars:
+        hostname: "{{ hostname_worker_2 }}"
+
+- hosts: all
+  vars_files:
+  - k8s_vars.yaml
+  become: true
+  tasks:
+    - name: Setup /etc/hosts file for DNS Resolution
+      lineinfile:
+        path: /etc/hosts
+        line: '{{ item.ip }} {{ item.hostname }} {{ item.desc }}'
+      loop:
+        - { ip: "{{ ip_master }}", hostname: "{{ hostname_master }}", desc: "master"}
+        - { ip: "{{ ip_nodo1 }}", hostname: "{{ hostname_worker_1 }}", desc: "nodo1"}
+        - { ip: "{{ ip_nodo2 }}", hostname: "{{ hostname_worker_2 }}", desc: "nodo2"}
+
+- name: Setup k8s cluster members
+  hosts: k8s-cluster
+  become: true
+  roles:
+    - swap
+    - firewall
+    - selinux
+    - docker
+    - k8s
+
+- name: Setup k8s master node
+  hosts: master-nodes-k8s
+  become: true
+  roles:
+    - k8s.master
+
+- name: Setup k8s worker nodes
+  hosts: worker-nodes-k8s
+  become: true
+  roles:
+    - k8s.worker

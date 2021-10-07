@@ -1,0 +1,9 @@
+#MASTER NODE IP
+ad_addr: 192.168.99.111
+
+cidr_v: 172.16.0.0/16
+
+services:
+- kubelet
+
+k8s_token: k8s_token

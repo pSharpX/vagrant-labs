@@ -1,0 +1,52 @@
+---
+- name: Start and enable kubelet
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  loop: "{{ services }}"
+  register: svc_start
+
+- name: Pull required k8s config images
+  shell: kubeadm config images pull
+  when: svc_start.changed
+
+- name: Reset kubeadm
+  shell: kubeadm reset -f
+  when: svc_start.changed
+
+- name: Start K8S cluster
+  shell: kubeadm init --apiserver-advertise-address {{ad_addr}} --pod-network-cidr={{cidr_v}}
+  register: output
+  when: svc_start.changed
+
+- name: Store output with generated token for adding workers to cluster
+  local_action: copy content={{ output.stdout }} dest=./{{ k8s_token }}
+  when: output.changed
+
+- name: Copy token to master
+  copy:
+    src: ./{{ k8s_token }}
+    dest: $HOME/{{ k8s_token }}
+  when: output.changed
+
+- name: Create folder for kube
+  file:
+    path: /home/vagrant/.kube
+    state: directory
+    owner: vagrant
+    group: vagrant
+  register: kube_dir
+
+- name: Copy admin.conf file to kube
+  copy:
+    src: "/etc/kubernetes/admin.conf"
+    dest: "/home/vagrant/.kube/config"
+    owner: vagrant
+    group: vagrant
+    remote_src: yes
+  when: kube_dir.changed
+
+- name: Setup weave-net network
+  shell: kubectl apply -f https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')
+  when: output.changed

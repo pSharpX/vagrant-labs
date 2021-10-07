@@ -1,0 +1,30 @@
+#MASTER NODE IP
+ad_addr: 192.168.99.111
+
+#CLUSTER MEMBERS IPs
+ip_master: 192.168.99.111
+ip_nodo1: 192.168.99.114
+ip_nodo2: 192.168.99.115
+
+#SERVERS HOSTNAMES
+hostname_master: k8s-master.ose.pe
+hostname_worker_1: k8s-worker01.ose.pe
+hostname_worker_2: k8s-worker02.ose.pe
+
+cidr_v: 172.16.0.0/16
+
+paquetes:
+- kubelet
+- kubeadm
+- kubectl
+
+servicios:
+- docker
+- kubelet
+
+ports:
+- "6443/tcp"
+- "10250/tcp"
+
+k8s_token: k8s_token
+
