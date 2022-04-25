@@ -1,7 +1,8 @@
 #!/bin/sh
 
-# **************** Install Ansible AWX on CentOS 8 ****************
+LATEST_AWX=17.0.1
 
+# **************** Install Ansible AWX on CentOS 8 ****************
 update_packages_repo_url(){
   echo ">>>>>>>>>> Update Packages Repository URL"
   sudo sed -i -e "s|mirrorlist=|#mirrorlist=|g" /etc/yum.repos.d/CentOS-*
@@ -14,9 +15,10 @@ update_packages_repo_url(){
 required_packages_installation(){
   echo ">>>>>>>>>> Install the EPEL repository in your system"
   sudo dnf install epel-release -y
-
+  
   echo ">>>>>>>>>> Install some additional packages required to run AWX on your system"
   sudo dnf install git gcc gcc-c++ nodejs gettext device-mapper-persistent-data lvm2 bzip2 -y
+  sudo yum install python3-pip libseccomp-devel -y
 }
 
 docker_installation(){
@@ -38,13 +40,13 @@ docker_installation(){
   # Verify the status of Docker service
   systemctl status docker
 
+  docker version
   echo "docker-ce is now installed on your CentOS system"
 }
 
 docker_compose_installation(){
   echo ">>>>>>>>>> Installing Docker compose"
-  sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-  sudo chmod +x /usr/local/bin/docker-compose
+  pip3 install docker docker-compose
 
   echo ">>>>>>>>>> Docker compose Version"
   docker-compose --version
@@ -54,7 +56,7 @@ docker_compose_installation(){
 
 ansible_installation(){
   echo ">>>>>>>>>> Installing Ansible"
-  dnf install ansible python3-pip -y
+  dnf install ansible -y
 
   echo ">>>>>>>>>> Ansible Version"
   ansible --version
@@ -64,19 +66,19 @@ ansible_installation(){
 
 ansible_awx_installation(){
   echo ">>>>>>>>>> Installing Ansible AWX"
-  ## Change dir to the home directory.
   cd ~
 
   ## Get the latest release of ansible awx tarball and extract it. 
   echo ">>>>>>>>>> Downloading the latest release of ansible awx tarball"
-  LATEST_AWX=$(curl -s https://api.github.com/repos/ansible/awx/tags |egrep name |head -1 |awk '{print $2}' |tr -d '"|,')
+
+  #LATEST_AWX=$(curl -s https://api.github.com/repos/ansible/awx/tags |egrep name |head -1 |awk '{print $2}' |tr -d '"|,')
   curl -L -o ansible-awx-$LATEST_AWX.tar.gz https://github.com/ansible/awx/archive/$LATEST_AWX.tar.gz && \
   tar xvfz ansible-awx-$LATEST_AWX.tar.gz && \
   rm -f ansible-awx-$LATEST_AWX.tar.gz
 
   ## Download and extract awx-logos repository. 
   echo ">>>>>>>>>> Downloading awx-logos repository"
-  ## (We could use git to clone the repo; but it requires git to be installed on the host.)
+
   curl -L -o awx-logos.tar.gz https://github.com/ansible/awx-logos/archive/master.tar.gz
   tar xvfz awx-logos.tar.gz
 
@@ -86,62 +88,22 @@ ansible_awx_installation(){
   ## Remove tarball
   rm -f *awx*.tar.gz
 
-  ## Enter awx folder.  
-  cd awx-$LATEST_AWX
+  ## Enter awx folder.
+  cd ~/awx-$LATEST_AWX/installer
 
-  # Initial Configurations
   echo ">>>>>>>>>> AWX: Initial Configurations"
 
   ## The tarball includes bunch of ansible playbooks and roles to install AWX with an inventory file that holds default configuration variables.
-  ## We are going to change the inventory file (located at installer/invetory) in order to deploy AWX with additional configurations like https support, official logos etc.
-  
-
-  ## 1)
-
-  ## By default, installer deploys AWX via docker-compose and uses official awx docker images which published on dockerhub to creates postgresql, redis, 
-  ## and a nginx based frontend container that required by AWX.
-
-  ## But if you want to do some additional configurations like https support; you need to build your local awx images by comment out
-  ## Disable dockerhub reference in order to build local images.
-
-  # sed -i "s|^dockerhub_base=ansible|#dockerhub_base=ansible|g" installer/inventory
-
-  ## Note: As of AWX version 6.1.0, the only way to enable https support is building local images. 
-  ## So, if you want to use official awx images from dockerhub, you SSL setup that we cover later in this post, cannot be done!
-
+  ## We are going to change the inventory file (located at installer/inventory) in order to deploy AWX with additional configurations like https support, official logos etc.
+ 
   ## 2)
-
   # As mentioned above, AWX requires a postgreSQL database and installer will automatically create a psql container for it. But in order to keep data in a persistent location, we need to create a folder to hold the db files in the host system and tell its path to the installer via postgres_data_dir variable.
 
   ## Create a folder in /opt/ to hold awx psql data
   mkdir -p /opt/awx-psql-data
 
   ## Provide psql data path to installer.
-  sed -i "s|^postgres_data_dir.*|postgres_data_dir=/opt/awx-psql-data|g" installer/inventory
-
-  ## 3)
-
-  ## Next parameters we’ll change is ssl_certificate which tells the installer enable https support for the frontend with the provided ssl key pair. 
-  ## (By default it only supports http.). With this parameter, we need to provide “a file” that should includes both a SSL certificate and its private key.
-
-  ## In this step, I’ll create a self-signed SSL located at /etc/awx-ssl/ folder and merge the .key and .crt files in another file at /etc/awx-ssl/awx-bundled-key.crt. Then I’ll pass the file path to ssl_certificate variable:
-
-  ## Create awx-ssl folder in /etc.
-  # mkdir -p /etc/awx-ssl/
-
-  ## Make a self-signed ssl certificate
-  # openssl req -subj '/CN=secops.tech/O=Secops Tech/C=TR' \
-  #   -new -newkey rsa:2048 \
-  #   -sha256 -days 1365 \
-  #   -nodes -x509 \
-  #   -keyout /etc/awx-ssl/awx.key \
-  #   -out /etc/awx-ssl//awx.crt
-
-  ## Merge awx.key and awx.crt files
-  # cat /etc/awx-ssl/awx.key /etc/awx-ssl/awx.crt > /etc/awx-ssl/awx-bundled-key.crt
-  
-  ## Pass the full path of awx-bundled-key.crt file to ssl_certificate variable in inventory.
-  # sed -i -E "s|^#([[:space:]]?)ssl_certificate=|ssl_certificate=/etc/awx-ssl/awx-bundled-key.crt|g" installer/inventory
+  sed -i "s|^postgres_data_dir.*|postgres_data_dir=/opt/awx-psql-data|g" inventory
 
   ## 4)
 
@@ -149,29 +111,19 @@ ansible_awx_installation(){
   ## I think the default logo that comes with AWX itself is horrible, so changing it might be good choice (believe me :)
 
   ## Replace awx_official parameter
-  sed -i -E "s|^#([[:space:]]?)awx_official=false|awx_official=true|g" installer/inventory
+  sed -i -E "s|^#([[:space:]]?)awx_official=false|awx_official=true|g" inventory
 
-  ## 5)
+cat <<EOF >> vars.yml
+admin_user: 'awx-admin'
+admin_password: 'CHANGE_ME'
+pg_password: 'pgpass'
+secret_key: 'mysupersecret'
+awx_official: 'true'
+EOF
 
-  ## Next, we need to change admin_userand admin_passwordparameters. 
-  ## By default, installer creates a super user and you can access the AWX ui with “admin/password” credentials. 
-  ## However changing the defaults is a good habit.
-
-  ## Define the default admin username
-  sed -i "s|^admin_user=.*|admin_user=awx-admin|g" installer/inventory
-
-  ## Set a password for the admin
-  sed -i "s|^admin_password=.*|admin_password=CHANGE_ME|g" installer/inventory
-
-  ## Installation
-  ## As I said before, AWX comes with a installer ansible playbooks/roles which makes the whole installation process simple. 
-  ## When you done with your configuration changes in the inventory file, you can just run the installer playbook like below:
-
-  ## Enter the installer directory.
-  cd ~/awx-$LATEST_AWX/installer
-
-  ## Initiate install.yml
-  ansible-playbook -i inventory install.yml
+  ## ansible-playbook -i inventory install.yml
+  ## ansible-playbook -i inventory install.yml -e @vars.yml
+  ## ansible-playbook -i inventory install.yml -e @vars.yml -e 'ansible_python_interpreter=/usr/bin/python3'
 
   echo "Ansible AWX is now installed on your CentOS system"
 }
@@ -188,6 +140,7 @@ fi
 update_packages_repo_url
 
 # Update package list and upgrade all packages
+
 #sudo yum check-update
 #sudo yum clean all
 #sudo yum -y update
