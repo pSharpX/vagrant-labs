@@ -2,25 +2,35 @@
 
 # **************** Install Ansible AWX on CentOS 8 ****************
 
+update_packages_repo_url(){
+  echo ">>>>>>>>>> Update Packages Repository URL"
+  sudo sed -i -e "s|mirrorlist=|#mirrorlist=|g" /etc/yum.repos.d/CentOS-*
+  sudo sed -i -e "s|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g" /etc/yum.repos.d/CentOS-*
+
+  sudo dnf clean all
+  sudo dnf swap centos-linux-repos centos-stream-repos -y
+}
+
 required_packages_installation(){
   echo ">>>>>>>>>> Install the EPEL repository in your system"
-  dnf install epel-release -y
+  sudo dnf install epel-release -y
 
   echo ">>>>>>>>>> Install some additional packages required to run AWX on your system"
-  dnf install git gcc gcc-c++ nodejs gettext device-mapper-persistent-data lvm2 bzip2 -y
+  sudo dnf install git gcc gcc-c++ nodejs gettext device-mapper-persistent-data lvm2 bzip2 -y
 }
 
 docker_installation(){
   echo ">>>>>>>>>> Installing docker-ce repository"
-  dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
+  sudo dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
 
   echo ">>>>>>>>>> Installing docker-ce"
-  dnf -y install docker-ce --nobest
+  sudo dnf -y install docker-ce --nobest
 
   # Start the Docker service and enable it to start after system reboot
-  systemctl enable docker
+  sudo systemctl enable docker
   # To join the docker group that is allowed to use the docker daemon
   sudo usermod -G docker -a $USER
+  sudo usermod -G docker -a vagrant
 
   # Restart the docker daemon
   sudo systemctl restart docker
@@ -31,6 +41,17 @@ docker_installation(){
   echo "docker-ce is now installed on your CentOS system"
 }
 
+docker_compose_installation(){
+  echo ">>>>>>>>>> Installing Docker compose"
+  sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  sudo chmod +x /usr/local/bin/docker-compose
+
+  echo ">>>>>>>>>> Docker compose Version"
+  docker-compose --version
+
+  echo "Docker compose is now installed on your CentOS system"
+}
+
 ansible_installation(){
   echo ">>>>>>>>>> Installing Ansible"
   dnf install ansible python3-pip -y
@@ -39,16 +60,6 @@ ansible_installation(){
   ansible --version
 
   echo "Ansible is now installed on your CentOS system"
-}
-
-docker_compose_installation(){
-  echo ">>>>>>>>>> Installing Docker compose"
-  pip3 install docker-compose
-
-  echo ">>>>>>>>>> Docker compose Version"
-  docker-compose --version
-
-  echo "Docker compose is now installed on your CentOS system"
 }
 
 ansible_awx_installation(){
@@ -173,11 +184,13 @@ then
   exit
 fi
 
+# Update packages URL
+update_packages_repo_url
 
 # Update package list and upgrade all packages
-yum check-update
-yum clean all
-yum -y update
+#sudo yum check-update
+#sudo yum clean all
+#sudo yum -y update
 
 # Required packages Installation
 required_packages_installation
@@ -185,11 +198,11 @@ required_packages_installation
 # Docker Installation
 docker_installation
 
-# Ansible Installation
-ansible_installation
-
 # Docker Compose Installation
 docker_compose_installation
+
+# Ansible Installation
+ansible_installation
 
 # Ansibe AWX Installation
 ansible_awx_installation

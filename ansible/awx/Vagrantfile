@@ -7,7 +7,7 @@
 # you're doing.
 
 VAGRANTFILE_API_VERSION = "2"
-VM_NAME = "ansible_awx_dev_environment"
+VM_NAME = "dev.ansible-awx.engine.pe"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # The most common configuration options are documented and commented below.
