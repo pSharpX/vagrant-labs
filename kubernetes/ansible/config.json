@@ -23,7 +23,7 @@
                         },
                         {
                             "key": "cpus",
-                            "value": 1
+                            "value": 2
                         }
                     ]
                 }
@@ -59,7 +59,7 @@
                         },
                         {
                             "key": "cpus",
-                            "value": 1
+                            "value": 2
                         }
                     ]
                 }
@@ -91,7 +91,7 @@
                         },
                         {
                             "key": "memory",
-                            "value": 2048
+                            "value": 4096
                         },
                         {
                             "key": "cpus",
@@ -134,11 +134,11 @@
                         },
                         {
                             "key": "memory",
-                            "value": 2048
+                            "value": 1024
                         },
                         {
                             "key": "cpus",
-                            "value": 2
+                            "value": 1
                         }
                     ]
                 }
