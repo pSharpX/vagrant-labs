@@ -115,7 +115,7 @@
                 },
                 "ansible_local": {
                     "install": true,
-                    "playbook": "./provisioning/test.yaml",
+                    "playbook": "./provisioning/playbook.yaml",
                     "install_mode ": "default",
                     "pip_install_cmd": "",
                     "version": "latest",

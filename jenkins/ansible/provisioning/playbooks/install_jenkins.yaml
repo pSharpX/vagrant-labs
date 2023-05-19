@@ -35,11 +35,14 @@
         name: jenkins
         state: restarted
         enabled: yes
+      listen: restart_jenkins_service
 
-    - name: Display Jenkins secret
+    - name: register_jenkins_secret
       command: cat /var/lib/jenkins/secrets/initialAdminPassword
       register: command_output
+      listen: restart_jenkins_service
 
-    - name: Print to console
+    - name: print_jenkins_secret
       debug:
         msg: "{{command_output.stdout_lines}}"
+      listen: restart_jenkins_service
