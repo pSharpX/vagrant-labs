@@ -67,3 +67,4 @@ ekpapalek/repo/ekpapalek/
 *.ignore
 nginx/ubuntu/download/
 ssh
+*.pem
