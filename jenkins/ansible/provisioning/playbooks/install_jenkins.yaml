@@ -1,0 +1,45 @@
+---
+- name: Jenkins Mater Setup
+  hosts: master
+  become: yes
+  gather_facts: true
+  tasks:
+    - name: Add Jenkins dependencies
+      apt:
+        name: "{{ jenkins_dependencies }}"
+        state: present
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Add Jenkins GPG key
+      apt_key:
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+        state: present
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Add Jenkins APT repository
+      apt_repository:
+        repo: deb [arch=amd64] http://pkg.jenkins.io/debian-stable binary/
+        state: present
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Jenkins Installation
+      apt:
+        name: "{{ jenkins }}"
+        state: latest
+      when: ansible_distribution == "Ubuntu"
+      notify: restart_jenkins_service
+
+  handlers:
+    - name: restart_jenkins_service
+      service:
+        name: jenkins
+        state: restarted
+        enabled: yes
+
+    - name: Display Jenkins secret
+      command: cat /var/lib/jenkins/secrets/initialAdminPassword
+      register: command_output
+
+    - name: Print to console
+      debug:
+        msg: "{{command_output.stdout_lines}}"

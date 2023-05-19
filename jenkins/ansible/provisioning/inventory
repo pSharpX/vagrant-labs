@@ -1,0 +1,6 @@
+node ansible_host=192.168.99.111
+master ansible_host=192.168.99.112
+
+[jenkins-servers]
+node
+master

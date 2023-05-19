@@ -1,0 +1,137 @@
+{
+    "vms": [
+        {
+            "box": "ubuntu/lunar64",
+            "name": "jenkins-node-01",
+            "hostname": "node01.jenkins.pe",
+            "network": {
+                "private_network": "192.168.99.111",
+                "forwarded_port": []
+            },
+            "synced_folder": [],
+            "chosen_provider": "virtualbox",
+            "provider": {
+                "virtualbox": {
+                    "modifyvm": [
+                        {
+                            "key": "name",
+                            "value": "node01.jenkins.pe"
+                        },
+                        {
+                            "key": "memory",
+                            "value": 1024
+                        },
+                        {
+                            "key": "cpus",
+                            "value": 1
+                        }
+                    ]
+                }
+            },
+            "provision": {},
+            "ssh": {},
+            "vagrant": {}
+        },
+        {
+            "box": "ubuntu/lunar64",
+            "name": "jenkins-master",
+            "hostname": "master.jenkins.pe",
+            "network": {
+                "private_network": "192.168.99.112",
+                "forwarded_port": []
+            },
+            "synced_folder": [],
+            "chosen_provider": "virtualbox",
+            "provider": {
+                "virtualbox": {
+                    "modifyvm": [
+                        {
+                            "key": "name",
+                            "value": "master.jenkins.pe"
+                        },
+                        {
+                            "key": "memory",
+                            "value": 2048
+                        },
+                        {
+                            "key": "cpus",
+                            "value": 2
+                        }
+                    ]
+                }
+            },
+            "provision": {},
+            "ssh": {},
+            "vagrant": {}
+        },
+        {
+            "box": "ubuntu/bionic64",
+            "name": "ansible-server",
+            "hostname": "ansible.server.pe",
+            "network": {
+                "private_network": "192.168.99.110",
+                "forwarded_port": []
+            },
+            "synced_folder": [
+                {
+                    "source": "./",
+                    "target": "/vagrant",
+                    "create": true,
+                    "mount_options": ["dmode=775,fmode=600"]
+                }
+            ],
+            "chosen_provider": "virtualbox",
+            "provider": {
+                "virtualbox": {
+                    "modifyvm": [
+                        {
+                            "key": "name",
+                            "value": "ansible.server.pe"
+                        },
+                        {
+                            "key": "memory",
+                            "value": 2048
+                        },
+                        {
+                            "key": "cpus",
+                            "value": 2
+                        }
+                    ]
+                }
+            },
+            "provision": {
+                "file": [
+                    {
+                        "source": "ansible.cfg",
+                        "destination": "~/.ansible.cfg"
+                    },
+                    {
+                        "source": "./ssh/jenkins-cluster-keypairs",
+                        "destination": "~/.ssh/id_rsa"
+                    }
+                ],
+                "shell": {
+                    "inline": "chown vagrant /home/vagrant/.ssh/id_rsa && chmod 600 /home/vagrant/.ssh/id_rsa"
+                },
+                "ansible_local": {
+                    "install": true,
+                    "playbook": "./provisioning/test.yaml",
+                    "install_mode ": "default",
+                    "pip_install_cmd": "",
+                    "version": "latest",
+                    "verbose": true,
+                    "provisioning_path": "/vagrant",
+                    "inventory_path": "./provisioning/inventory",
+                    "limit": "all"
+                }
+            },
+            "ssh": {},
+            "vagrant": {}
+        }
+    ],
+    "box": "ubuntu/lunar64",
+    "ssh": {
+        "forward_agent": false
+    },
+    "vagrant": {}
+}

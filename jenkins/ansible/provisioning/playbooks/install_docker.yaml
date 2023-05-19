@@ -1,0 +1,41 @@
+---
+- name: Docker Setup
+  hosts: jenkins-servers
+  become: yes
+  gather_facts: true
+  tasks:
+    - name: Add docker dependencies
+      apt:
+        name: "{{ docker_dependencies }}"
+        state: present
+      when: ansible_distribution == "Ubuntu"
+    
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Add Docker APT repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/{{ ansible_system | lower }}/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Docker Installation
+      apt:
+        name: "{{ docker }}"
+        state: latest
+      when: ansible_distribution == "Ubuntu"
+      notify: start_docker_service
+
+    - name: Add user vagrant to docker group
+      user:
+        name: vagrant
+        groups: docker
+        append: yes
+
+  handlers:
+    - name: start_docker_service
+      service:
+        name: docker
+        state: started
+        enabled: yes

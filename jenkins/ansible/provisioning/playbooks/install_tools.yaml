@@ -1,0 +1,11 @@
+---
+- name: Tools Setup
+  hosts: jenkins-servers
+  become: yes
+  gather_facts: true
+  tasks:
+    - name: Tools Installation
+      apt:
+        name: "{{ tools }}"
+        state: latest
+      when: ansible_distribution == "Ubuntu"

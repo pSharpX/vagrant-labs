@@ -1,0 +1,4 @@
+---
+- import_playbook: playbooks/install_tools.yaml
+- import_playbook: playbooks/install_docker.yaml
+- import_playbook: playbooks/install_jenkins.yaml
