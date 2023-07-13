@@ -1,0 +1,35 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+
+VAGRANTFILE_API_VERSION = "2"
+VAGRANTPLUGIN_DISKSIZE="vagrant-disksize"
+VM_NAME = "cluster.gitlab.pe"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box = "ubuntu/lunar64"
+  config.vm.define VM_NAME
+
+  config.vm.network "forwarded_port", guest: 8080, host: 8080
+  config.vm.network "private_network", ip: "192.168.33.40"
+  config.vm.network "public_network"
+
+  config.vm.synced_folder "./config", "/vagrant_config", create: true
+
+  if Vagrant.has_plugin?(VAGRANTPLUGIN_DISKSIZE)
+    config.disksize.size = '60GB'
+  end
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.cpus = 4
+    vb.memory = "4096"
+    vb.name = VM_NAME
+  end
+
+  config.vm.provision :shell, path: "install_docker.sh"
+  config.vm.provision :shell, path: "install_gitlab.sh"
+end
