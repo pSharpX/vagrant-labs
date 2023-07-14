@@ -47,9 +47,9 @@ configure_gitlab(){
     gitlab-ctl start
 
     # You can also check the status of services either running on your system
-    sudo gitlab-ctl status
+    gitlab-ctl status
 
-    sudo cat /etc/gitlab/initial_root_password | grep 'Password:'
+    cat /etc/gitlab/initial_root_password | grep 'Password:'
 }
 
 export DEBIAN_FRONTEND=noninteractive
