@@ -69,10 +69,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     server.vm.provision "file", source: "./ssh/rsa", destination: "$HOME/remote_machines/rsa"
     server.vm.provision "file", source: "./provisioning", destination: "$HOME/playbooks/gitlab"
+    server.vm.provision "shell", inline: "chmod 600 /home/vagrant/remote_machines/rsa"
 
     server.vm.provision "ansible_local" do |ansible|
-      #ansible.install_mode = "pip"
-      #ansible.version = "latest"
       ansible.provisioning_path = "/home/vagrant/playbooks/gitlab"
       ansible.inventory_path = "/home/vagrant/playbooks/gitlab/inventory"
       ansible.limit = "all"
