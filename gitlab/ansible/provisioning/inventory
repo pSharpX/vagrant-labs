@@ -1,0 +1,9 @@
+runner01 ansible_host=192.168.33.61 ansible_ssh_private_key_file=/home/vagrant/remote_machines/rsa
+master ansible_host=192.168.33.50   ansible_ssh_private_key_file=/home/vagrant/remote_machines/rsa
+
+[runners]
+runner01
+
+[machines]
+runner01
+master

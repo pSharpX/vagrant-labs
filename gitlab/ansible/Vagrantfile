@@ -1,0 +1,85 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+
+VAGRANTFILE_API_VERSION = "2"
+VAGRANTPLUGIN_DISKSIZE="vagrant-disksize"
+
+IMAGE_NAME = "ubuntu/lunar64"
+RUNNER_IMAGE_NAME = "ubuntu/bionic64"
+RUNNERS = 1
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.box = IMAGE_NAME
+
+  if Vagrant.has_plugin?(VAGRANTPLUGIN_DISKSIZE)
+    config.disksize.size = '60GB'
+  end
+
+  config.vm.provider "virtualbox" do |runners|
+    runners.cpus = 1
+    runners.memory = "2048"
+  end
+
+  config.vm.define "gitlab-server" do |server|
+    server.vm.network "forwarded_port", guest: 80, host: 8080
+    server.vm.network "private_network", ip: "192.168.33.50"
+    server.vm.network "public_network"
+    server.vm.hostname = "gitlab"
+
+    server.vm.provider "virtualbox" do |vb|
+      vb.cpus = 2
+      vb.memory = "4096"
+      vb.name = "cluster.gitlab.pe"
+    end
+
+    server.vm.provision "file", source: "./ssh/rsa.pub", destination: "$HOME/allowed_machines/rsa.pub"
+    server.vm.provision "shell", inline: "cat /home/vagrant/allowed_machines/rsa.pub | cat >> /home/vagrant/.ssh/authorized_keys"
+  end
+
+  (1..RUNNERS).each do |i|
+    config.vm.define "runner-#{i}" do |runner|
+      runner.vm.box = RUNNER_IMAGE_NAME
+      runner.vm.network "private_network", ip: "192.168.33.#{i + 60}"
+      runner.vm.hostname = "runner-#{i}"
+      runner.vm.provider "virtualbox" do |vb|
+        vb.name = "gitlab.runner0#{i}.pe"
+      end
+
+      runner.vm.provision "file", source: "./ssh/rsa.pub", destination: "$HOME/allowed_machines/rsa.pub"
+      runner.vm.provision "shell", inline: "cat /home/vagrant/allowed_machines/rsa.pub | cat >> /home/vagrant/.ssh/authorized_keys"
+      #runner.vm.provision :reload
+    end
+  end
+
+  config.vm.define "ansible-server" do |server|
+    server.vm.box = RUNNER_IMAGE_NAME
+    server.vm.network "private_network", ip: "192.168.33.55"
+    server.vm.hostname = "ansible"
+
+    server.vm.provider "virtualbox" do |vb|
+      vb.cpus = 1
+      vb.memory = "1024"
+      vb.name = "ansible.server.pe"
+    end
+
+    server.vm.provision "file", source: "./ssh/rsa", destination: "$HOME/remote_machines/rsa"
+    server.vm.provision "file", source: "./provisioning", destination: "$HOME/playbooks/gitlab"
+
+    server.vm.provision "ansible_local" do |ansible|
+      #ansible.install_mode = "pip"
+      #ansible.version = "latest"
+      ansible.provisioning_path = "/home/vagrant/playbooks/gitlab"
+      ansible.inventory_path = "/home/vagrant/playbooks/gitlab/inventory"
+      ansible.limit = "all"
+      ansible.playbook = "ping.yaml"
+    end
+  end
+
+  #config.vm.provision :shell, path: "install_docker.sh"
+  #config.vm.provision :shell, path: "install_gitlab.sh"
+end
