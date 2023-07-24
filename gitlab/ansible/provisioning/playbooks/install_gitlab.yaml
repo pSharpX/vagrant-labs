@@ -1,0 +1,73 @@
+---
+- name: GitLab Setup
+  hosts: master
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Set default Postfix mailname setting
+      debconf:
+        name: postfix
+        question: postfix/mailname 
+        value: "cluster.gitlab.pe"
+        vtype: "string"
+
+    - name: Set default Postfix mailer_type setting
+      debconf:
+        name: postfix
+        question: postfix/main_mailer_type
+        value: "Internet Site"
+        vtype: "string"
+    
+    - name: Add GitLab dependencies
+      apt:
+        name: "{{ gitlab_dependencies }}"
+        state: present
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Download GitLab repository installer
+      get_url:
+        url: https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh
+        return_content: yes
+      when: ansible_distribution == "Ubuntu"
+      register: gitlab_repository_installer
+
+    - name: Run GitLab repository installer
+      shell:
+        cmd: sh -s -- -y
+        stdin: "{{ gitlab_repository_installer.content }}"
+
+    # Downloading GitLab pgk manually since it's not available for Ubuntu 23.04 yet
+    - name: Download GitLab Package
+      get_url:
+        url: "{{ gitlab_package_url }}"
+        dest: "/tmp/{{ gitlab_package_name }}.deb"
+      when: ansible_distribution == "Ubuntu"
+
+    - name: GitLab Installation
+      apt: deb="/tmp/{{ gitlab_package_name }}.deb"
+      when: ansible_distribution == "Ubuntu"
+    
+    - name: Configure GitLab
+      command: sed -i "/^external_url/ s|'.*|'http://cluster.gitlab.pe'|" /etc/gitlab/gitlab.rb
+
+    - name: Reconfigure GitLab
+      command: gitlab-ctl reconfigure
+
+    - name: Start GitLab
+      command: gitlab-ctl start
+      notify: restart_gitlab_service
+
+  handlers:
+    - name: restart_gitlab_service
+      command: gitlab-ctl status
+      listen: restart_gitlab_service
+
+    - name: register_gitlab_password
+      command: cat /etc/gitlab/initial_root_password | grep 'Password:'
+      register: command_output
+      listen: restart_gitlab_service
+
+    - name: print_gitlab_password
+      debug:
+        msg: "{{command_output.stdout_lines}}"
+      listen: restart_gitlab_service

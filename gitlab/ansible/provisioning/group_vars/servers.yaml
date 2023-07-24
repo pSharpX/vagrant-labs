@@ -1,0 +1,23 @@
+---
+tools:
+  - vim
+
+gitlab_dependencies:
+  - openssh-server
+  - tzdata
+  - perl
+  - postfix
+
+docker_dependencies:
+  - curl
+  - gnupg
+  - apt-transport-https
+  - ca-certificates
+  - software-properties-common
+
+docker: 
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-buildx-plugin
+  - docker-compose-plugin
