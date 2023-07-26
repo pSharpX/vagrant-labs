@@ -4,3 +4,4 @@ gitlab:
 
 gitlab_package_url: https://packages.gitlab.com/gitlab/gitlab-ce/packages/debian/bookworm/gitlab-ce_16.2.0-ce.0_amd64.deb/download.deb
 gitlab_package_name: gitlab-ce_16.2.0-ce.0_amd64.deb
+gitlab_hostname: cluster.gitlab.pe

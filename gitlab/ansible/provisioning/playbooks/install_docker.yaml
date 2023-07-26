@@ -4,7 +4,7 @@
   become: true
   gather_facts: true
   tasks:
-    - name: Add docker dependencies
+    - name: Install docker dependencies
       apt:
         name: "{{ docker_dependencies }}"
         state: present
@@ -19,6 +19,11 @@
       apt_repository:
         repo: deb [arch=amd64] https://download.docker.com/{{ ansible_system | lower }}/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable
       when: ansible_distribution == "Ubuntu"
+    
+    - name: Update and upgrade apt packages
+      apt:
+        upgrade: true
+        update_cache: true
 
     - name: Docker Installation
       apt:

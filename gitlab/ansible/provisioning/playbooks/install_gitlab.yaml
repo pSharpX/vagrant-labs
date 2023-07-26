@@ -8,8 +8,9 @@
       debconf:
         name: postfix
         question: postfix/mailname 
-        value: "cluster.gitlab.pe"
+        value: "{{ gitlab_hostname }}"
         vtype: "string"
+      when: ansible_distribution == "Ubuntu"
 
     - name: Set default Postfix mailer_type setting
       debconf:
@@ -17,6 +18,7 @@
         question: postfix/main_mailer_type
         value: "Internet Site"
         vtype: "string"
+      when: ansible_distribution == "Ubuntu"
     
     - name: Add GitLab dependencies
       apt:
@@ -25,15 +27,15 @@
       when: ansible_distribution == "Ubuntu"
 
     - name: Download GitLab repository installer
-      get_url:
+      uri:
         url: https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh
-        return_content: yes
+        return_content: true
       when: ansible_distribution == "Ubuntu"
       register: gitlab_repository_installer
 
     - name: Run GitLab repository installer
       shell:
-        cmd: sh -s -- -y
+        cmd: bash
         stdin: "{{ gitlab_repository_installer.content }}"
 
     # Downloading GitLab pgk manually since it's not available for Ubuntu 23.04 yet
@@ -48,7 +50,8 @@
       when: ansible_distribution == "Ubuntu"
     
     - name: Configure GitLab
-      command: sed -i "/^external_url/ s|'.*|'http://cluster.gitlab.pe'|" /etc/gitlab/gitlab.rb
+      command: sed -i "/^external_url/ s|'.*|'http://{{ gitlab_hostname }}'|" /etc/gitlab/gitlab.rb
+      warn: false
 
     - name: Reconfigure GitLab
       command: gitlab-ctl reconfigure
@@ -63,7 +66,8 @@
       listen: restart_gitlab_service
 
     - name: register_gitlab_password
-      command: cat /etc/gitlab/initial_root_password | grep 'Password:'
+      command: grep -i 'Password:' /etc/gitlab/initial_root_password
+      sudo: true
       register: command_output
       listen: restart_gitlab_service
 
