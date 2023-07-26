@@ -75,10 +75,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       ansible.provisioning_path = "/home/vagrant/playbooks/gitlab"
       ansible.inventory_path = "/home/vagrant/playbooks/gitlab/inventory"
       ansible.limit = "all"
-      ansible.playbook = "ping.yaml"
+      ansible.playbook = "playbook.yaml"
     end
   end
-
-  #config.vm.provision :shell, path: "install_docker.sh"
-  #config.vm.provision :shell, path: "install_gitlab.sh"
 end
