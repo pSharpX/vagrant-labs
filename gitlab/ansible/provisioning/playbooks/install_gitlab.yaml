@@ -51,7 +51,8 @@
     
     - name: Configure GitLab
       command: sed -i "/^external_url/ s|'.*|'http://{{ gitlab_hostname }}'|" /etc/gitlab/gitlab.rb
-      warn: false
+      args:
+        warn: false
 
     - name: Reconfigure GitLab
       command: gitlab-ctl reconfigure
@@ -67,7 +68,6 @@
 
     - name: register_gitlab_password
       command: grep -i 'Password:' /etc/gitlab/initial_root_password
-      sudo: true
       register: command_output
       listen: restart_gitlab_service
 
