@@ -1,0 +1,61 @@
+---
+- name: GitLab Runner
+  hosts: runners
+  become: true
+  gather_facts: true
+  tasks:
+  - name: Refresh package cache
+    apt:
+      cache_valid_time: 3600
+    when: ansible_distribution == "Ubuntu"
+
+  - name: (Debian) Get Gitlab repository installation script
+    get_url:
+      url: "https://packages.gitlab.com/install/repositories/runner/{{ gitlab_runner_package_name }}/script.deb.sh"
+      dest: "{{ gitlab_runner_package_path }}"
+      mode: 0744
+    when: ansible_distribution == "Ubuntu"
+
+  - name: (Debian) Install Gitlab repository
+    command: bash {{ gitlab_runner_package_path }}
+    args:
+      creates: "/etc/apt/sources.list.d/runner_{{ gitlab_runner_package_name }}.list"
+    become: true
+    when: ansible_distribution == "Ubuntu"
+
+  - name: (Debian) Update gitlab_runner_package_name
+    set_fact:
+      gitlab_runner_package: "{{ gitlab_runner_package_name }}={{ gitlab_runner_package_version }}"
+      gitlab_runner_package_state: "present"
+    when: gitlab_runner_package_version is defined
+
+  - name: (Debian) Set gitlab_runner_package_name
+    set_fact:
+      gitlab_runner_package: "{{ gitlab_runner_package_name }}"
+      gitlab_runner_package_state: "latest"
+    when: gitlab_runner_package_version is not defined
+
+  - name: (Debian) Install GitLab Runner
+    apt:
+      name: "{{ gitlab_runner_package }}"
+      state: "{{ gitlab_runner_package_state }}"
+    environment:
+      GITLAB_RUNNER_DISABLE_SKEL: "true"
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Construct the runner command
+    set_fact:
+      register_runner_cmd: >-
+        gitlab-runner register
+        --non-interactive
+        --url '{{ gitlab_runner_url }}'
+        --name '{{ actual_gitlab_runner_name }}'
+        --tag-list '{{ gitlab_runner_tags|default(["ansible"]) | join(",") }}'
+        --executor '{{ gitlab_runner_executor|default("shell") }}'
+
+  - name: Register runner to GitLab
+    command: >
+      {{ register_runner_cmd }}
+      --registration-token '{{ gitlab_runner_registration_token }}'
+    when: ansible_distribution == "Ubuntu"
+    no_log: true

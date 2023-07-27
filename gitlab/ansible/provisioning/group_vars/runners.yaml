@@ -1,0 +1,5 @@
+gitlab_runner_package_name: gitlab-runner
+gitlab_runner_url: YOUR_GITLAB_SERVER
+gitlab_runner_package_path: /tmp/gitlab-runner.script.deb.sh
+actual_gitlab_runner_name: docker_runner
+gitlab_runner_registration_token: YOUR_REGISTRATION_TOKEN
